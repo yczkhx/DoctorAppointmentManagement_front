@@ -1,4 +1,4 @@
-# doctorappointmentmanagement_front
+# DoctorAppointmentManagement_front
 
 ## Project setup
 ```
