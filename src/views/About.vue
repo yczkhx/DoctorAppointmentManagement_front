@@ -3,10 +3,10 @@
     <el-container>
       <el-header>
         <el-menu
-          :default-active="activeIndex2"
+         
           class="el-menu-demo"
           mode="horizontal"
-          @select="handleSelect"
+         
         >
           <div
             class="el-icon-office-building"
@@ -85,6 +85,20 @@
             </FullCalendar>
           </div>
         </div>
+        <!-- <div>
+          <el-dialog
+            title="提示"
+            :visible.sync="dialogVisible"
+            width="30%"
+            :before-close="handleClose"
+          >
+            <el-input v-model="title2" placeholder="请输入内容"></el-input>
+            <span slot="footer" class="dialog-footer">
+              <el-button @click="dialogVisible = false">取 消</el-button>
+              <el-button type="primary" @click="setcalendar()">确 定</el-button>
+            </span>
+          </el-dialog>
+        </div> -->
       </el-main>
     </el-container>
   </div>
@@ -126,6 +140,8 @@ export default {
 
   data: function () {
     return {
+      title2:'',
+      dialogVisible: true,
       calendarOptions: {
         plugins: [
           dayGridPlugin,
@@ -165,6 +181,8 @@ export default {
     handleDateSelect(selectInfo) {
       let title = prompt("Please enter a new title for your event");
       let calendarApi = selectInfo.view.calendar;
+      let abc = title;
+      console.log(calendarApi);
 
       calendarApi.unselect(); // clear date selection
 
@@ -175,8 +193,23 @@ export default {
           start: selectInfo.startStr,
           end: selectInfo.endStr,
           allDay: selectInfo.allDay,
+          abc : selectInfo.allDay,
         });
       }
+    },
+
+    setcalendar() {
+      let calendarApi = selectInfo.view.calendar;
+
+      calendarApi.unselect(); // clear date selection
+      calendarApi.addEvent({
+        id: createEventId(),
+        title2,
+        start: selectInfo.startStr,
+        end: selectInfo.endStr,
+        allDay: selectInfo.allDay,
+      });
+      dialogVisible = false;
     },
 
     handleEventClick(clickInfo) {
