@@ -56,17 +56,17 @@
           <el-card class="box-card">
             <div class="demo-app-sidebar">
               <div class="demo-app-sidebar-section">
-                <h2>Instructions</h2>
+                <h2>Unfinished</h2>
                 <ul>
                   <li>
-                    Select dates and you will be prompted to create a new event
+                    Here are the events you need to finish
                   </li>
                   <li>Drag, drop, and resize events</li>
                   <li>Click an event to delete it</li>
                 </ul>
               </div>
               <div class="demo-app-sidebar-section">
-                <h2>All Events ({{ currentEvents.length }})</h2>
+                <h2>Unfinished Events ({{ currentEvents.length }})</h2>
                 <ul>
                   <li v-for="event in currentEvents" :key="event.id">
                     <b>{{ event.startStr }}</b>
@@ -74,7 +74,13 @@
                   </li>
                 </ul>
               </div>
+              
             </div>
+            
+            <div style="position:fixed;bottom:0;">
+                <el-button type="primary" @click="gotoOpera()">创建合作项目</el-button>
+              </div>
+           
           </el-card>
           <div class="demo-app-main">
             <FullCalendar class="demo-app-calendar" :options="calendarOptions">
@@ -85,20 +91,7 @@
             </FullCalendar>
           </div>
         </div>
-        <!-- <div>
-          <el-dialog
-            title="提示"
-            :visible.sync="dialogVisible"
-            width="30%"
-            :before-close="handleClose"
-          >
-            <el-input v-model="title2" placeholder="请输入内容"></el-input>
-            <span slot="footer" class="dialog-footer">
-              <el-button @click="dialogVisible = false">取 消</el-button>
-              <el-button type="primary" @click="setcalendar()">确 定</el-button>
-            </span>
-          </el-dialog>
-        </div> -->
+        
       </el-main>
     </el-container>
   </div>
@@ -220,6 +213,10 @@ export default {
       ) {
         clickInfo.event.remove();
       }
+    },
+    
+    gotoOpera(){
+      this.$router.push("/opera");
     },
 
     handleEvents(events) {
