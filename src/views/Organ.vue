@@ -41,39 +41,34 @@
           style="width: 30%; float: left;"
           >
           <div style="float:left;">
-            <h1>马文博医院</h1>
+            <h1>XX科</h1>
             <p>吧啦吧啦吧啦吧啦简介</p>
           </div>
-          <!-- <el-button 
-          type="primary"
-          style="margin-top:50px;margin-right:50px;float:right;"
-          >
-            预约
-          </el-button> -->
         </el-card>
-        <div style="margin:auto; margin-top: 15px; width:80%">
-          <el-input placeholder="输入科室或医生姓名进行查找" >
-            <el-button slot="append" icon="el-icon-search"></el-button>
-          </el-input>
-        </div>
-        <el-card style="margin:auto; margin-top: 15px; width:80%">
-          <el-collapse accordion>
-            <el-collapse-item title="预约规则">
-              <div>与现实生活一致：与现实生活的流程、逻辑保持一致，遵循用户习惯的语言和概念；</div>
-              <div>在界面中一致：所有的元素和结构需保持一致，比如：设计样式、图标和文本、元素的位置等。</div>
-            </el-collapse-item>
-          </el-collapse>
+        <el-card style="width:70%; margin:auto;margin-top:15px">
+            <div style="height:120px">
+                <img 
+                src="../../public/test.jpg" 
+                style="height: 70%; float: left; margin:15px"
+                >
+                <p style="float: left; margin:15px">XXX 主任医师</p>
+                <p style="float: left; margin:15px">空闲时间</p>
+                <el-button @click="drawer = true" type="primary" style="margin-left: 16px;float: right;">
+                    预约
+                </el-button>
+            </div>
+            <el-divider></el-divider>
+            <p>
+                简介
+            </p>
         </el-card>
-        <el-card style="margin:auto; margin-top: 15px; width:80%">
-          <el-tabs v-model="activeName" @tab-click="handleClick">
-            <el-tab-pane label="挂号科室" name="first">
-              <a href="#/organ">XX科</a>
-            </el-tab-pane>
-            <el-tab-pane label="全部科室" name="second">
-              全部科室
-            </el-tab-pane>
-          </el-tabs>
-        </el-card>
+        <el-drawer
+        title="我是标题"
+        :visible.sync="drawer"
+        :direction="direction"
+        :before-close="handleClose">
+        <span>我来啦!</span>
+        </el-drawer>
       </el-main>
     </el-container>
   </div>
@@ -89,16 +84,21 @@ export default {
   components: {
     HelloWorld
   },
-  data() {
-    return {
-      activeName: 'first'
-    };
-  },
-  methods: {
-    handleClick(tab, event) {
-      console.log(tab, event);
+    data() {
+        return {
+            drawer: false,
+            direction: 'rtl',
+        };
+    },
+    methods: {
+        handleClose(done) {
+            this.$confirm('确认关闭？')
+                .then(_ => {
+                    done();
+                })
+                .catch(_ => {});
+        }
     }
-  }
 }
 
 </script>
