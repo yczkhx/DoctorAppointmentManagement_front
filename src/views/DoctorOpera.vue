@@ -217,7 +217,7 @@ body > .el-container {
 
 .box-card {
   width: 800px;
-  margin-left: 300px;
+  margin-left: 330px;
   
   background-color: rgb(252, 253, 252);
 }

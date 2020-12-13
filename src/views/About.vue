@@ -2,12 +2,7 @@
   <div>
     <el-container>
       <el-header>
-        <el-menu
-         
-          class="el-menu-demo"
-          mode="horizontal"
-         
-        >
+        <el-menu class="el-menu-demo" mode="horizontal">
           <div
             class="el-icon-office-building"
             style="
@@ -58,9 +53,7 @@
               <div class="demo-app-sidebar-section">
                 <h2>Unfinished</h2>
                 <ul>
-                  <li>
-                    Here are the events you need to finish
-                  </li>
+                  <li>Here are the events you need to finish</li>
                   <li>Drag, drop, and resize events</li>
                   <li>Click an event to delete it</li>
                 </ul>
@@ -74,13 +67,13 @@
                   </li>
                 </ul>
               </div>
-              
             </div>
-            
-            <div style="position:fixed;bottom:0;">
-                <el-button type="primary" @click="gotoOpera()">创建合作项目</el-button>
-              </div>
-           
+
+            <div style="position: fixed; bottom: 0">
+              <el-button type="primary" @click="gotoOpera()"
+                >创建合作项目</el-button
+              >
+            </div>
           </el-card>
           <div class="demo-app-main">
             <FullCalendar class="demo-app-calendar" :options="calendarOptions">
@@ -91,7 +84,48 @@
             </FullCalendar>
           </div>
         </div>
-        
+        <el-dialog title="详细信息" :visible.sync="dialogVisible" width="30%">
+          <el-input
+            type="textarea"
+            :rows="7"
+            placeholder="事件详细信息"
+            v-model="eventText"
+          >
+          </el-input>
+          <span slot="footer" class="dialog-footer">
+            <el-button type="info" @click="changeEvent()">修 改</el-button>
+            <el-button type="success" @click="changeEvent()">已完成</el-button>
+            <el-button type="warning" @click="changeEvent()">未完成</el-button>
+            <el-button
+              type="danger"
+              @click="deletethisevent()"
+              @keyup.enter="deletethisevent()"
+              style="margin-right: 37px"
+              >删 除</el-button
+            >
+          </span>
+        </el-dialog>
+
+        <el-dialog title="新建日程" :visible.sync="dialogFormVisible">
+          <el-form>
+            <el-form-item label="日程名称">
+              <el-input v-model="eventName"></el-input>
+            </el-form-item>
+            <el-form-item label="详细信息">
+              <el-input
+                type="textarea"
+                :rows="7"
+                placeholder="事件详细信息"
+                v-model="eventText2"
+              >
+              </el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="setcalendar()">确 定</el-button>
+          </div>
+        </el-dialog>
       </el-main>
     </el-container>
   </div>
@@ -103,6 +137,8 @@ import FullCalendar from "@fullcalendar/vue";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import allLocales from "@fullcalendar/core/locales-all";
+import listPlugin from "@fullcalendar/list";
 //import { INITIAL_EVENTS, createEventId } from './event-utils'
 import Element from "element-ui";
 
@@ -133,19 +169,25 @@ export default {
 
   data: function () {
     return {
-      title2:'',
-      dialogVisible: true,
+      eventText: "ssss",
+      eventText2: "无",
+      eventName: "",
+      nowclickinfo: [],
+      dialogVisible: false,
+      dialogFormVisible: false,
       calendarOptions: {
         plugins: [
           dayGridPlugin,
           timeGridPlugin,
           interactionPlugin, // needed for dateClick
+          listPlugin,
         ],
         headerToolbar: {
           left: "prev,next today",
           center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay",
+          right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
         },
+        locale: "zh",
         initialView: "dayGridMonth",
         initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
         editable: true,
@@ -156,6 +198,7 @@ export default {
         select: this.handleDateSelect,
         eventClick: this.handleEventClick,
         eventsSet: this.handleEvents,
+        eventChange: this.handleEventChange,
         /* you can update a remote database when these fire:
         eventAdd:
         eventChange:
@@ -163,6 +206,10 @@ export default {
         */
       },
       currentEvents: [],
+      newEventSelectInfo: [],
+      newtitle: "未命名",
+      newCalendar: "",
+      nowCalendar:'',
     };
   },
 
@@ -172,55 +219,96 @@ export default {
     },
 
     handleDateSelect(selectInfo) {
-      let title = prompt("Please enter a new title for your event");
-      let calendarApi = selectInfo.view.calendar;
-      let abc = title;
-      console.log(calendarApi);
+      this.newEventSelectInfo = selectInfo;
+      this.newCalendar = selectInfo.view.calendar;
+      this.dialogFormVisible = true;
 
-      calendarApi.unselect(); // clear date selection
+      // let title = prompt("Please enter a new title for your event");
+      // let calendarApi = selectInfo.view.calendar;
+      // let abc = title;
+      // //console.log(calendarApi);
 
-      if (title) {
-        calendarApi.addEvent({
-          id: createEventId(),
-          title,
-          start: selectInfo.startStr,
-          end: selectInfo.endStr,
-          allDay: selectInfo.allDay,
-          abc : selectInfo.allDay,
-        });
-      }
+      this.newCalendar.unselect(); // clear date selection
+
+      // if (title) {
+      //   calendarApi.addEvent({
+      //     id: createEventId(),
+      //     title,
+      //     start: selectInfo.startStr,
+      //     end: selectInfo.endStr,
+      //     allDay: selectInfo.allDay,
+      //     abc: selectInfo.allDay,
+      //   });
+      // }
     },
 
     setcalendar() {
-      let calendarApi = selectInfo.view.calendar;
-
-      calendarApi.unselect(); // clear date selection
-      calendarApi.addEvent({
+      //event.setExtendedProp(text,'');
+      let event1 = this.newCalendar.addEvent({
         id: createEventId(),
-        title2,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
-        allDay: selectInfo.allDay,
+        title: this.eventName,
+        start: this.newEventSelectInfo.startStr,
+        end: this.newEventSelectInfo.endStr,
+        allDay: this.newEventSelectInfo.allDay,
+        extendedProps: {
+          text: this.eventText2,
+        },
       });
-      dialogVisible = false;
+      //console.log(event1)
+
+      //console.log(event1.extendedProps.text)
+
+      this.eventName = "";
+      this.eventText2 = "无";
+      this.dialogFormVisible = false;
     },
 
     handleEventClick(clickInfo) {
-      if (
-        confirm(
-          `Are you sure you want to delete the event '${clickInfo.event.title}'`
-        )
-      ) {
-        clickInfo.event.remove();
-      }
+      //console.log(clickInfo.event);
+      this.nowclickinfo = clickInfo;
+      console.log(this.nowclickinfo);
+      this.eventText = this.nowclickinfo.event.extendedProps.text;
+
+      this.nowCalendar=clickInfo.view.calendar;
+      //console.log(this.nowclickinfo.event.extendedProps.text);
+      //console.log(this.eventText);
+      this.dialogVisible = true;
+
+      // if (
+      //   confirm(
+      //     `Are you sure you want to delete the event '${clickInfo.event.title}'`
+      //   )
+      // ) {
+      //   clickInfo.event.remove();
+      // }
     },
-    
-    gotoOpera(){
+
+    deletethisevent() {
+      this.nowclickinfo.event.remove();
+      this.dialogVisible = false;
+    },
+
+    changeEvent() {
+      // console.log("修改");
+      // console.log(this.nowclickinfo.event);
+      // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
+      this.nowCalendar.getEventById(this.nowclickinfo.event.id).setExtendedProp('text', this.eventText )
+      
+      this.dialogVisible = false;
+    },
+
+    gotoOpera() {
       this.$router.push("/opera");
     },
 
     handleEvents(events) {
+      //事件设置成功时的函数
       this.currentEvents = events;
+      //console.log(this.currentEvents);
+    },
+
+    handleEventChange(clickInfo) {
+      console.log(clickInfo);
     },
   },
 };
@@ -235,7 +323,7 @@ export default {
 }
 
 .el-main {
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(248, 248, 248);
   color: #333;
   text-align: center;
 }
