@@ -197,7 +197,7 @@ export default {
 }
 
 .el-main {
-  background-color: rgb(243, 243, 243);
+  background-color: rgb(255, 255, 255);
   color: #333;
   text-align: center;
   height: 800px;

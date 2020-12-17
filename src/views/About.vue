@@ -141,6 +141,7 @@ import allLocales from "@fullcalendar/core/locales-all";
 import listPlugin from "@fullcalendar/list";
 //import { INITIAL_EVENTS, createEventId } from './event-utils'
 import Element from "element-ui";
+import axios from "axios";
 
 let eventGuid = 0;
 let todayStr = new Date().toISOString().replace(/T.*$/, ""); // YYYY-MM-DD of today
@@ -209,8 +210,11 @@ export default {
       newEventSelectInfo: [],
       newtitle: "未命名",
       newCalendar: "",
-      nowCalendar:'',
+      nowCalendar: "",
     };
+  },
+  mounted() {
+    this.initialallView();
   },
 
   methods: {
@@ -269,7 +273,7 @@ export default {
       console.log(this.nowclickinfo);
       this.eventText = this.nowclickinfo.event.extendedProps.text;
 
-      this.nowCalendar=clickInfo.view.calendar;
+      this.nowCalendar = clickInfo.view.calendar;
       //console.log(this.nowclickinfo.event.extendedProps.text);
       //console.log(this.eventText);
       this.dialogVisible = true;
@@ -292,8 +296,10 @@ export default {
       // console.log("修改");
       // console.log(this.nowclickinfo.event);
       // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
-      this.nowCalendar.getEventById(this.nowclickinfo.event.id).setExtendedProp('text', this.eventText )
-      
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setExtendedProp("text", this.eventText);
+
       this.dialogVisible = false;
     },
 
@@ -309,6 +315,24 @@ export default {
 
     handleEventChange(clickInfo) {
       console.log(clickInfo);
+    },
+
+    initialallView() {
+      axios
+        .get("http://localhost:8082/doctor/as", {
+          params: {
+            id: 1,
+          },
+        })
+        .then(function (response) {
+          console.log(response.data.activities);
+          for(var i in response.data.activities){
+            console.log(response.data.activities[i].activity_id)
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
   },
 };
