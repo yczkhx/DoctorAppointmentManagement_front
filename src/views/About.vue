@@ -84,41 +84,32 @@
             </FullCalendar>
           </div>
         </div>
-        <el-dialog title="详细信息" :visible.sync="dialogVisible" width="30%">
+        <el-dialog title="修改名称" :visible.sync="dialogVisible" width="30%">
           <el-input
-            type="textarea"
-            :rows="7"
-            placeholder="事件详细信息"
+          type="text"
+            placeholder="修改事件"
             v-model="eventText"
+            maxlength="45"
+            show-word-limit
           >
           </el-input>
           <span slot="footer" class="dialog-footer">
-            <el-button type="info" @click="changeEvent()">修 改</el-button>
-            <el-button type="success" @click="changeEvent()">已完成</el-button>
-            <el-button type="warning" @click="changeEvent()">未完成</el-button>
+            <el-button type="info" @click="changetheEventTitle()" style="margin-right: 20px">修 改</el-button>
+            <el-button type="success" @click="changetheEventState()" style="margin-right: 20px">已完成</el-button>
             <el-button
               type="danger"
               @click="deletethisevent()"
               @keyup.enter="deletethisevent()"
-              style="margin-right: 37px"
+              style="margin-right: 65px"
               >删 除</el-button
             >
           </span>
         </el-dialog>
 
-        <el-dialog title="新建日程" :visible.sync="dialogFormVisible">
+        <el-dialog title="新建日程" :visible.sync="dialogFormVisible" width="30%">
           <el-form>
             <el-form-item label="日程名称">
-              <el-input v-model="eventName"></el-input>
-            </el-form-item>
-            <el-form-item label="详细信息">
-              <el-input
-                type="textarea"
-                :rows="7"
-                placeholder="事件详细信息"
-                v-model="eventText2"
-              >
-              </el-input>
+              <el-input v-model="eventName" maxlength="45" show-word-limit></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -164,8 +155,7 @@ export default {
 
   data: function () {
     return {
-      eventText: "ssss",
-      eventText2: "无",
+      eventText: "",
       eventName: "",
       nowclickinfo: [],
       dialogVisible: false,
@@ -207,6 +197,10 @@ export default {
       newtitle: "未命名",
       newCalendar: "",
       nowCalendar: "",
+      neweventifday: "",
+      neweventdate: "",
+      neweventstart: "",
+      neweventend: "",
     };
   },
   mounted() {
@@ -250,9 +244,9 @@ export default {
                 start: res.data.activities[i].date,
                 color: color,
                 extendedProps: {
-                state: res.data.activities[i].state,
-                type:res.data.activities[i].type
-              },
+                  state: res.data.activities[i].state,
+                  type: res.data.activities[i].type,
+                },
               });
               continue;
             }
@@ -271,7 +265,7 @@ export default {
               color: color,
               extendedProps: {
                 state: res.data.activities[i].state,
-                type:res.data.activities[i].type
+                type: res.data.activities[i].type,
               },
             });
           }
@@ -291,6 +285,13 @@ export default {
     handleDateSelect(selectInfo) {
       this.newEventSelectInfo = selectInfo;
       this.newCalendar = selectInfo.view.calendar;
+      //console.log(this.newCalendar);
+      //console.log(selectInfo.startStr.slice(11,19))
+      this.neweventifday = selectInfo.allDay;
+      this.neweventdate = selectInfo.startStr.slice(0, 10);
+      this.neweventstart = selectInfo.startStr.slice(11, 19);
+      this.neweventend = selectInfo.endStr.slice(11, 19);
+      //console.log(this.neweventend)
       this.dialogFormVisible = true;
 
       // let title = prompt("Please enter a new title for your event");
@@ -299,7 +300,8 @@ export default {
       // //console.log(calendarApi);
 
       this.newCalendar.unselect(); // clear date selection
-
+      //console.log(this.newCalendar);
+      //console.log(selectInfo)
       // if (title) {
       //   calendarApi.addEvent({
       //     id: createEventId(),
@@ -313,32 +315,51 @@ export default {
     },
 
     setcalendar() {
+      const thistitle = this.eventName;
+      axios
+        .get("http://localhost:8082/doctor/new", {
+          params: {
+            date1: this.neweventdate,
+            time_start1: this.neweventstart,
+            time_end1: this.neweventend,
+            detail: this.eventName,
+            type: "0",
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          let event1 = this.newCalendar.addEvent({
+            id: res.data.activityid,
+            title: thistitle,
+            start: this.newEventSelectInfo.startStr,
+            end: this.newEventSelectInfo.endStr,
+            allDay: this.newEventSelectInfo.allDay,
+            color: "#409EFF",
+            extendedProps: {
+              state: 0,
+              type: '0',
+            },
+          });
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       //event.setExtendedProp(text,'');
-      let event1 = this.newCalendar.addEvent({
-        id: createEventId(),
-        title: this.eventName,
-        start: this.newEventSelectInfo.startStr,
-        end: this.newEventSelectInfo.endStr,
-        allDay: this.newEventSelectInfo.allDay,
-        backgroundColor: "green",
-        extendedProps: {
-          text: this.eventText2,
-        },
-      });
-      console.log(event1);
+
+      //console.log(event1);
 
       //console.log(event1.extendedProps.text)
 
       this.eventName = "";
-      this.eventText2 = "无";
       this.dialogFormVisible = false;
     },
 
     handleEventClick(clickInfo) {
-      console.log(clickInfo.event);
+      //console.log(clickInfo.event);
       this.nowclickinfo = clickInfo;
       //console.log(this.nowclickinfo);
-      this.eventText = this.nowclickinfo.event.extendedProps.text;
+      this.eventText = this.nowclickinfo.event.title;
 
       this.nowCalendar = clickInfo.view.calendar;
       //console.log(this.nowclickinfo.event.extendedProps.text);
@@ -356,17 +377,92 @@ export default {
 
     deletethisevent() {
       this.nowclickinfo.event.remove();
+      axios
+        .get("http://localhost:8082/doctor/delete", {
+          params: {
+            id:'1',
+            activity_id:this.nowclickinfo.event.id,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res)
+        
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       this.dialogVisible = false;
     },
 
-    changeEvent() {
+    changetheEventTitle() {
       //事件详细信息改变
       // console.log("修改");
       // console.log(this.nowclickinfo.event);
       // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
       this.nowCalendar
         .getEventById(this.nowclickinfo.event.id)
-        .setExtendedProp("text", this.eventText);
+        .setProp("title", this.eventText);
+
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id:this.nowclickinfo.event.id,
+            date1: this.nowclickinfo.event.startStr.slice(0, 10),
+            time_start1: this.nowclickinfo.event.startStr.slice(11, 19),
+            time_end1: this.nowclickinfo.event.endStr.slice(11, 19),
+            detail: this.eventText,
+            type: this.nowclickinfo.event.extendedProps.type,
+            state: this.nowclickinfo.event.extendedProps.state
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res)
+        
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+      this.dialogVisible = false;
+    },
+
+    changetheEventState() {
+      //事件详细信息改变
+      // console.log("修改");
+      // console.log(this.nowclickinfo.event);
+      // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("backgroundColor", '#67C23A');
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("borderColor", '#67C23A');
+
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id:this.nowclickinfo.event.id,
+            date1: this.nowclickinfo.event.startStr.slice(0, 10),
+            time_start1: this.nowclickinfo.event.startStr.slice(11, 19),
+            time_end1: this.nowclickinfo.event.endStr.slice(11, 19),
+            detail: this.nowclickinfo.event.title,
+            type: this.nowclickinfo.event.extendedProps.type,
+            sta: 1
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res)
+        
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
 
       this.dialogVisible = false;
     },
@@ -383,6 +479,27 @@ export default {
 
     handleEventChange(clickInfo) {
       console.log(clickInfo);
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id:clickInfo.event.id,
+            date1: clickInfo.event.startStr.slice(0, 10),
+            time_start1: clickInfo.event.startStr.slice(11, 19),
+            time_end1: clickInfo.event.endStr.slice(11, 19),
+            detail: clickInfo.event.title,
+            type: clickInfo.event.extendedProps.type,
+            state: clickInfo.event.extendedProps.state
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res)
+        
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
     },
   },
 };
