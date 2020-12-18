@@ -146,23 +146,17 @@ import axios from "axios";
 let eventGuid = 0;
 let todayStr = new Date().toISOString().replace(/T.*$/, ""); // YYYY-MM-DD of today
 
-export const INITIAL_EVENTS = [
-  {
-    id: createEventId(),
-    title: "All-day event",
-    start: todayStr,
-  },
-  {
-    id: createEventId(),
-    title: "Timed event",
-    start: todayStr + "T12:00:00",
-  },
-];
-
+//console.log(todayStr + "T12:00:00")
 export function createEventId() {
   return String(eventGuid++);
 }
-
+var EVENTS = [
+  {
+    id: "0",
+    title: "1",
+    start: todayStr,
+  },
+];
 export default {
   components: {
     FullCalendar, // make the <FullCalendar> tag available
@@ -190,7 +184,7 @@ export default {
         },
         locale: "zh",
         initialView: "dayGridMonth",
-        initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+        //initialEvents: this.forINITIAL_EVENTS(), // alternatively, use the `events` setting to fetch from a feed
         editable: true,
         selectable: true,
         selectMirror: true,
@@ -200,6 +194,8 @@ export default {
         eventClick: this.handleEventClick,
         eventsSet: this.handleEvents,
         eventChange: this.handleEventChange,
+        eventDataTransform: this.tranform,
+        events: this.forINITIAL_EVENTS(),
         /* you can update a remote database when these fire:
         eventAdd:
         eventChange:
@@ -214,10 +210,80 @@ export default {
     };
   },
   mounted() {
-    this.initialallView();
+    //this.initialallView();
+    //this.forINITIAL_EVENTS();
   },
 
   methods: {
+    forINITIAL_EVENTS() {
+      var INITIAL_EVENTS = [
+        {
+          id: "x",
+          title: "少时诵诗书所所所所所所所所所所",
+          start: todayStr,
+          color: "#67C23A",
+        },
+      ];
+      axios
+        .get("http://localhost:8082/doctor/as", {
+          params: {
+            id: 1,
+          },
+        })
+        .then((res) => {
+          //console.log(res.data.activities);
+          for (var i in res.data.activities) {
+            var color = "#409EFF";
+            if (res.data.activities[i].state == 1) {
+              color = "#67C23A";
+            }
+            if (res.data.activities[i].type == 1) {
+              color = "#F56C6C";
+            }
+            if (
+              res.data.activities[i].time_start == null &&
+              res.data.activities[i].time_end == null
+            ) {
+              INITIAL_EVENTS.push({
+                id: res.data.activities[i].activity_id,
+                title: res.data.activities[i].detail,
+                start: res.data.activities[i].date,
+                color: color,
+                extendedProps: {
+                state: res.data.activities[i].state,
+                type:res.data.activities[i].type
+              },
+              });
+              continue;
+            }
+            //console.log(res.data.activities[i].date+'T'+res.data.activities[i].time_start);
+            INITIAL_EVENTS.push({
+              id: res.data.activities[i].activity_id,
+              title: res.data.activities[i].detail,
+              start:
+                res.data.activities[i].date +
+                "T" +
+                res.data.activities[i].time_start,
+              end:
+                res.data.activities[i].date +
+                "T" +
+                res.data.activities[i].time_end,
+              color: color,
+              extendedProps: {
+                state: res.data.activities[i].state,
+                type:res.data.activities[i].type
+              },
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      console.log(INITIAL_EVENTS);
+
+      return INITIAL_EVENTS;
+    },
+
     handleWeekendsToggle() {
       this.calendarOptions.weekends = !this.calendarOptions.weekends; // update a property
     },
@@ -254,11 +320,12 @@ export default {
         start: this.newEventSelectInfo.startStr,
         end: this.newEventSelectInfo.endStr,
         allDay: this.newEventSelectInfo.allDay,
+        backgroundColor: "green",
         extendedProps: {
           text: this.eventText2,
         },
       });
-      //console.log(event1)
+      console.log(event1);
 
       //console.log(event1.extendedProps.text)
 
@@ -268,9 +335,9 @@ export default {
     },
 
     handleEventClick(clickInfo) {
-      //console.log(clickInfo.event);
+      console.log(clickInfo.event);
       this.nowclickinfo = clickInfo;
-      console.log(this.nowclickinfo);
+      //console.log(this.nowclickinfo);
       this.eventText = this.nowclickinfo.event.extendedProps.text;
 
       this.nowCalendar = clickInfo.view.calendar;
@@ -293,6 +360,7 @@ export default {
     },
 
     changeEvent() {
+      //事件详细信息改变
       // console.log("修改");
       // console.log(this.nowclickinfo.event);
       // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
@@ -315,24 +383,6 @@ export default {
 
     handleEventChange(clickInfo) {
       console.log(clickInfo);
-    },
-
-    initialallView() {
-      axios
-        .get("http://localhost:8082/doctor/as", {
-          params: {
-            id: 1,
-          },
-        })
-        .then(function (response) {
-          console.log(response.data.activities);
-          for(var i in response.data.activities){
-            console.log(response.data.activities[i].activity_id)
-          }
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
     },
   },
 };
