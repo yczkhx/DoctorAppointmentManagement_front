@@ -26,7 +26,7 @@ const routes = [
     component: () => import(/* webpackChunkName: "about" */ '../views/DoctorOpera.vue')
   },
   {
-    path: '/organ',
+    path: '/organ/:id',
     name: 'organ',
     component: ()=>import(/* webpackChunkName: "about" */'../views/Organ.vue')
   },

@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="organ">
     <el-container>
       <el-header>
         <el-menu
@@ -15,7 +15,7 @@
             "
           ></div>
           <div style="float: left;margin-right: 20px;font-size: 28px; ">
-            马文博医院
+            XX医院
           </div>
           <el-link 
           type="primary"
@@ -41,33 +41,52 @@
           style="width: 30%; float: left;"
           >
           <div style="float:left;">
-            <h1>XX科</h1>
+            <h1>{{organName}}</h1>
             <p>吧啦吧啦吧啦吧啦简介</p>
           </div>
         </el-card>
-        <el-card style="width:70%; margin:auto;margin-top:15px">
+        <div v-for="(doctor) in doctors">
+          <el-card style="width:70%; margin:auto;margin-top:15px">
             <div style="height:120px">
                 <img 
                 src="../../public/test.jpg" 
                 style="height: 70%; float: left; margin:15px"
                 >
-                <p style="float: left; margin:15px">XXX 主任医师</p>
+                <div style="float: left; margin:15px">
+                  <p>{{doctor.name}}</p>
+                  <p>{{doctor.tittle}}</p>
+                </div>
                 <p style="float: left; margin:15px">空闲时间</p>
-                <el-button @click="drawer = true" type="primary" style="margin-left: 16px;float: right;">
+                <el-button 
+                @click="handleClick(doctor)"
+                type="primary" 
+                style="margin-left: 16px;float: right;">
                     预约
                 </el-button>
             </div>
             <el-divider></el-divider>
             <p>
-                简介
+              {{doctor.intro}}
             </p>
-        </el-card>
+          </el-card>
+        </div>
+        
         <el-drawer
-        title="我是标题"
+        title="预约医生"
         :visible.sync="drawer"
         :direction="direction"
         :before-close="handleClose">
-        <span>我来啦!</span>
+          <div>
+            {{organName}}
+            {{currentDoctor.tittle}}
+            {{currentDoctor.name}}
+            选择时间
+          </div>
+          <div>
+            <el-button type="primary">
+              预约
+            </el-button>
+          </div>
         </el-drawer>
       </el-main>
     </el-container>
@@ -80,25 +99,45 @@ import HelloWorld from '@/components/HelloWorld.vue'
 import Element from 'element-ui'
 
 export default {
-  name: 'Home',
-  components: {
-    HelloWorld
+  name: 'Organ',
+  data() {
+      return {
+        organName:'XX科',
+        drawer: false,
+        direction: 'rtl',
+        doctors:[
+          {
+            id:1,
+            name:'名字',
+            tittle:'主任医师',
+            intro:'简介'
+          },
+          {
+            id:2,
+            name:'名字2',
+            tittle:'主任医师2',
+            intro:'简介2'
+          },
+        ],
+        currentDoctor:[]
+      };
   },
-    data() {
-        return {
-            drawer: false,
-            direction: 'rtl',
-        };
+  methods: {
+    handleClick(doctor){
+      this.drawer=true;
+      console.log(doctor.id);
+      this.currentDoctor.id=doctor.id;
+      this.currentDoctor.name=doctor.name;
+      this.currentDoctor.tittle=doctor.tittle;
     },
-    methods: {
-        handleClose(done) {
-            this.$confirm('确认关闭？')
-                .then(_ => {
-                    done();
-                })
-                .catch(_ => {});
-        }
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+            done();
+        })
+        .catch(_ => {});
     }
+  }
 }
 
 </script>
