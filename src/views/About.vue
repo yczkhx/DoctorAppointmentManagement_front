@@ -55,7 +55,7 @@
                 <ul>
                   <li>Here are the events you need to finish</li>
                   <li>Drag, drop, and resize events</li>
-                  <li>Click an event to delete it</li>
+                  <li>Sort by change time</li>
                 </ul>
               </div>
               <div class="demo-app-sidebar-section">
@@ -64,6 +64,7 @@
                   <li v-for="event in currentEvents" :key="event.id">
                     <b>{{ event.startStr }}</b>
                     <i>{{ event.title }}</i>
+                    <!-- <s v-if="delete">{{ event.title }}</s> -->
                   </li>
                 </ul>
               </div>
@@ -84,41 +85,58 @@
             </FullCalendar>
           </div>
         </div>
-        <el-dialog title="详细信息" :visible.sync="dialogVisible" width="30%">
+        <el-dialog title="修改名称" :visible.sync="dialogVisible" width="30%">
           <el-input
-            type="textarea"
-            :rows="7"
-            placeholder="事件详细信息"
+            type="text"
+            placeholder="修改事件"
             v-model="eventText"
+            maxlength="45"
+            show-word-limit
           >
           </el-input>
           <span slot="footer" class="dialog-footer">
-            <el-button type="info" @click="changeEvent()">修 改</el-button>
-            <el-button type="success" @click="changeEvent()">已完成</el-button>
-            <el-button type="warning" @click="changeEvent()">未完成</el-button>
+            <el-button
+              type="info"
+              @click="changetheEventTitle()"
+              style="margin-right: 10px"
+              >修 改</el-button
+            >
+            <el-button
+              type="success"
+              @click="changetheEventStatetoFinished()"
+              style="margin-right: 10px"
+              :disabled="finished"
+              >已完成</el-button
+            >
+            <el-button
+              type="warning"
+              @click="changetheEventStatetoUnfinished()"
+              style="margin-right: 10px"
+              :disabled="unfinished"
+              >未完成</el-button
+            >
             <el-button
               type="danger"
               @click="deletethisevent()"
               @keyup.enter="deletethisevent()"
-              style="margin-right: 37px"
+              style="margin-right: 20px"
               >删 除</el-button
             >
           </span>
         </el-dialog>
 
-        <el-dialog title="新建日程" :visible.sync="dialogFormVisible">
+        <el-dialog
+          title="新建日程"
+          :visible.sync="dialogFormVisible"
+          width="30%"
+        >
           <el-form>
             <el-form-item label="日程名称">
-              <el-input v-model="eventName"></el-input>
-            </el-form-item>
-            <el-form-item label="详细信息">
               <el-input
-                type="textarea"
-                :rows="7"
-                placeholder="事件详细信息"
-                v-model="eventText2"
-              >
-              </el-input>
+                v-model="eventName"
+                maxlength="45"
+                show-word-limit
+              ></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -141,27 +159,22 @@ import allLocales from "@fullcalendar/core/locales-all";
 import listPlugin from "@fullcalendar/list";
 //import { INITIAL_EVENTS, createEventId } from './event-utils'
 import Element from "element-ui";
+import axios from "axios";
 
 let eventGuid = 0;
 let todayStr = new Date().toISOString().replace(/T.*$/, ""); // YYYY-MM-DD of today
 
-export const INITIAL_EVENTS = [
-  {
-    id: createEventId(),
-    title: "All-day event",
-    start: todayStr,
-  },
-  {
-    id: createEventId(),
-    title: "Timed event",
-    start: todayStr + "T12:00:00",
-  },
-];
-
+//console.log(todayStr + "T12:00:00")
 export function createEventId() {
   return String(eventGuid++);
 }
-
+var EVENTS = [
+  {
+    id: "0",
+    title: "1",
+    start: todayStr,
+  },
+];
 export default {
   components: {
     FullCalendar, // make the <FullCalendar> tag available
@@ -169,8 +182,9 @@ export default {
 
   data: function () {
     return {
-      eventText: "ssss",
-      eventText2: "无",
+      finished: false,
+      unfinished: false,
+      eventText: "",
       eventName: "",
       nowclickinfo: [],
       dialogVisible: false,
@@ -189,16 +203,35 @@ export default {
         },
         locale: "zh",
         initialView: "dayGridMonth",
-        initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+        //initialEvents: this.forINITIAL_EVENTS(), // alternatively, use the `events` setting to fetch from a feed
         editable: true,
         selectable: true,
         selectMirror: true,
         dayMaxEvents: true,
         weekends: true,
+        navLinks: true,
+        navLinkDayClick:"timeGridDay",
+        nowIndicator: true,
+        businessHours: [
+          // specify an array instead
+          {
+            daysOfWeek: [1, 2, 3, 4, 5], // Monday, Tuesday, Wednesday
+            startTime: "08:00", // 8am
+            endTime: "17:00", // 6pm
+          },
+          {
+            daysOfWeek: [0, 6], // Thursday, Friday
+            startTime: "09:00", // 10am
+            endTime: "16:00", // 4pm
+          },
+        ],
+        snapDuration: "00:01",
         select: this.handleDateSelect,
         eventClick: this.handleEventClick,
-        eventsSet: this.handleEvents,
+        //eventsSet: this.handleEvents,
         eventChange: this.handleEventChange,
+        eventDataTransform: this.tranform,
+        events: this.forINITIAL_EVENTS(),
         /* you can update a remote database when these fire:
         eventAdd:
         eventChange:
@@ -209,11 +242,101 @@ export default {
       newEventSelectInfo: [],
       newtitle: "未命名",
       newCalendar: "",
-      nowCalendar:'',
+      nowCalendar: "",
+      neweventifday: "",
+      neweventdate: "",
+      neweventstart: "",
+      neweventend: "",
     };
+  },
+  mounted() {
+    //this.initialallView();
+    //this.forINITIAL_EVENTS();
   },
 
   methods: {
+    forINITIAL_EVENTS() {
+      var INITIAL_EVENTS = [];
+      axios
+        .get("http://localhost:8082/doctor/as", {
+          params: {
+            id: 1,
+          },
+        })
+        .then((res) => {
+          //console.log(res.data.activities);
+          for (var i in res.data.activities) {
+            var color = "#409EFF";
+            if (res.data.activities[i].state == 1) {
+              color = "#67C23A";
+            }
+            if (res.data.activities[i].type == 1) {
+              color = "#F56C6C";
+            }
+            if (
+              res.data.activities[i].time_start == null &&
+              res.data.activities[i].time_end == null
+            ) {
+              INITIAL_EVENTS.push({
+                id: res.data.activities[i].activity_id,
+                title: res.data.activities[i].detail,
+                start: res.data.activities[i].date,
+                color: color,
+                extendedProps: {
+                  state: res.data.activities[i].state,
+                  type: res.data.activities[i].type,
+                },
+              });
+              continue;
+            }
+            if (color === "#409EFF") {
+              this.currentEvents.push({
+                id: res.data.activities[i].activity_id,
+                title: res.data.activities[i].detail,
+                startStr:
+                  res.data.activities[i].date +
+                  "|" +
+                  res.data.activities[i].time_start,
+                endStr:
+                  res.data.activities[i].date +
+                  "|" +
+                  res.data.activities[i].time_end,
+                color: color,
+                extendedProps: {
+                  state: res.data.activities[i].state,
+                  type: res.data.activities[i].type,
+                },
+              });
+            }
+
+            //console.log(res.data.activities[i].date+'T'+res.data.activities[i].time_start);
+            INITIAL_EVENTS.push({
+              id: res.data.activities[i].activity_id,
+              title: res.data.activities[i].detail,
+              start:
+                res.data.activities[i].date +
+                "T" +
+                res.data.activities[i].time_start,
+              end:
+                res.data.activities[i].date +
+                "T" +
+                res.data.activities[i].time_end,
+              color: color,
+              extendedProps: {
+                state: res.data.activities[i].state,
+                type: res.data.activities[i].type,
+              },
+            });
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      console.log(INITIAL_EVENTS);
+
+      return INITIAL_EVENTS;
+    },
+
     handleWeekendsToggle() {
       this.calendarOptions.weekends = !this.calendarOptions.weekends; // update a property
     },
@@ -221,6 +344,13 @@ export default {
     handleDateSelect(selectInfo) {
       this.newEventSelectInfo = selectInfo;
       this.newCalendar = selectInfo.view.calendar;
+      //console.log(this.newCalendar);
+      //console.log(selectInfo.startStr.slice(11,19))
+      this.neweventifday = selectInfo.allDay;
+      this.neweventdate = selectInfo.startStr.slice(0, 10);
+      this.neweventstart = selectInfo.startStr.slice(11, 19);
+      this.neweventend = selectInfo.endStr.slice(11, 19);
+      //console.log(this.neweventend)
       this.dialogFormVisible = true;
 
       // let title = prompt("Please enter a new title for your event");
@@ -229,7 +359,8 @@ export default {
       // //console.log(calendarApi);
 
       this.newCalendar.unselect(); // clear date selection
-
+      //console.log(this.newCalendar);
+      //console.log(selectInfo)
       // if (title) {
       //   calendarApi.addEvent({
       //     id: createEventId(),
@@ -243,33 +374,70 @@ export default {
     },
 
     setcalendar() {
+      const thistitle = this.eventName;
+      axios
+        .get("http://localhost:8082/doctor/new", {
+          params: {
+            date1: this.neweventdate,
+            time_start1: this.neweventstart,
+            time_end1: this.neweventend,
+            detail: this.eventName,
+            type: "0",
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          let event1 = this.newCalendar.addEvent({
+            id: res.data.activityid,
+            title: thistitle,
+            start: this.newEventSelectInfo.startStr,
+            end: this.newEventSelectInfo.endStr,
+            allDay: this.newEventSelectInfo.allDay,
+            color: "#409EFF",
+            extendedProps: {
+              state: 0,
+              type: "0",
+            },
+          });
+          this.currentEvents.push({
+            id: res.data.activity_id,
+            title: thistitle,
+            startStr:
+              this.newEventSelectInfo.startStr.slice(0, 10) +
+              "|" +
+              this.newEventSelectInfo.startStr.slice(11, 19),
+            endStr:
+              this.newEventSelectInfo.endStr.slice(0, 10) +
+              "|" +
+              this.newEventSelectInfo.endStr.slice(11, 19),
+            color: "#409EFF",
+            extendedProps: {
+              state: 0,
+              type: "0",
+            },
+          });
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       //event.setExtendedProp(text,'');
-      let event1 = this.newCalendar.addEvent({
-        id: createEventId(),
-        title: this.eventName,
-        start: this.newEventSelectInfo.startStr,
-        end: this.newEventSelectInfo.endStr,
-        allDay: this.newEventSelectInfo.allDay,
-        extendedProps: {
-          text: this.eventText2,
-        },
-      });
-      //console.log(event1)
+
+      //console.log(event1);
 
       //console.log(event1.extendedProps.text)
 
       this.eventName = "";
-      this.eventText2 = "无";
       this.dialogFormVisible = false;
     },
 
     handleEventClick(clickInfo) {
-      //console.log(clickInfo.event);
+      console.log(clickInfo.event);
       this.nowclickinfo = clickInfo;
-      console.log(this.nowclickinfo);
-      this.eventText = this.nowclickinfo.event.extendedProps.text;
+      //console.log(this.nowclickinfo);
+      this.eventText = this.nowclickinfo.event.title;
 
-      this.nowCalendar=clickInfo.view.calendar;
+      this.nowCalendar = clickInfo.view.calendar;
       //console.log(this.nowclickinfo.event.extendedProps.text);
       //console.log(this.eventText);
       this.dialogVisible = true;
@@ -283,17 +451,189 @@ export default {
       // }
     },
 
+    updateUnfinished(thisId, newTitle, newStartStr, newEndStr) {
+      for (var i in this.currentEvents) {
+        if (this.currentEvents[i].id == thisId) {
+          this.currentEvents[i].title = newTitle;
+          this.currentEvents[i].startStr =
+            newStartStr.slice(0, 10) + "|" + newStartStr.slice(11, 19);
+          this.currentEvents[i].endStr =
+            newEndStr.slice(0, 10) + "|" + newEndStr.slice(11, 19);
+          break;
+        }
+      }
+    },
+
     deletethisevent() {
       this.nowclickinfo.event.remove();
+      axios
+        .get("http://localhost:8082/doctor/delete", {
+          params: {
+            id: "1",
+            activity_id: this.nowclickinfo.event.id,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res);
+
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
       this.dialogVisible = false;
     },
 
-    changeEvent() {
+    changetheEventTitle() {
+      //事件详细信息改变
       // console.log("修改");
-      // console.log(this.nowclickinfo.event);
+      console.log(this.nowclickinfo.event);
       // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
-      this.nowCalendar.getEventById(this.nowclickinfo.event.id).setExtendedProp('text', this.eventText )
-      
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("title", this.eventText);
+
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id: this.nowclickinfo.event.id,
+            date1: this.nowclickinfo.event.startStr.slice(0, 10),
+            time_start1: this.nowclickinfo.event.startStr.slice(11, 19),
+            time_end1: this.nowclickinfo.event.endStr.slice(11, 19),
+            detail: this.eventText,
+            type: this.nowclickinfo.event.extendedProps.type,
+            sta: this.nowclickinfo.event.extendedProps.state,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res);
+
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.updateUnfinished(
+        this.nowclickinfo.event.id,
+        this.eventText,
+        this.nowclickinfo.event.startStr,
+        this.nowclickinfo.event.endStr
+      );
+
+      this.dialogVisible = false;
+    },
+
+    changetheEventStatetoFinished() {
+      //事件状态改变为已完成
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("backgroundColor", "#67C23A");
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("borderColor", "#67C23A");
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setExtendedProp("state", 1);
+
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id: this.nowclickinfo.event.id,
+            date1: this.nowclickinfo.event.startStr.slice(0, 10),
+            time_start1: this.nowclickinfo.event.startStr.slice(11, 19),
+            time_end1: this.nowclickinfo.event.endStr.slice(11, 19),
+            detail: this.nowclickinfo.event.title,
+            type: this.nowclickinfo.event.extendedProps.type,
+            sta: 1,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res);
+
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+      for (var i in this.currentEvents) {
+        if (this.currentEvents[i].id == this.nowclickinfo.event.id) {
+          this.currentEvents.splice(i, 1);
+        }
+      }
+      //this.finished=true;
+      //this.unfinished=false;
+
+      this.dialogVisible = false;
+    },
+
+    changetheEventStatetoUnfinished() {
+      //事件状态改变为未完成
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("backgroundColor", "#409EFF");
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("borderColor", "#409EFF");
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setExtendedProp("type", "changed");
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setExtendedProp("state", 0);
+
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id: this.nowclickinfo.event.id,
+            date1: this.nowclickinfo.event.startStr.slice(0, 10),
+            time_start1: this.nowclickinfo.event.startStr.slice(11, 19),
+            time_end1: this.nowclickinfo.event.endStr.slice(11, 19),
+            detail: this.nowclickinfo.event.title,
+            type: "changed",
+            sta: 0,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res);
+
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      var test = 0;
+      for (var i in this.currentEvents) {
+        if (this.currentEvents[i].id == this.nowclickinfo.event.id) {
+          test = 1;
+        }
+      }
+      if (test == 0) {
+        this.currentEvents.push({
+          id: this.nowclickinfo.event.id,
+          title: this.nowclickinfo.event.title,
+          startStr:
+            this.nowclickinfo.event.startStr.slice(0, 10) +
+            "|" +
+            this.nowclickinfo.event.startStr.slice(11, 19),
+          endStr:
+            this.nowclickinfo.event.endStr.slice(0, 10) +
+            "|" +
+            this.nowclickinfo.event.endStr.slice(11, 19),
+          color: "#67C23A",
+          extendedProps: {
+            state: 0,
+            type: "changed",
+          },
+        });
+      }
+
+      //this.finished=false;
+      //this.unfinished=true;
       this.dialogVisible = false;
     },
 
@@ -301,14 +641,61 @@ export default {
       this.$router.push("/opera");
     },
 
-    handleEvents(events) {
-      //事件设置成功时的函数
-      this.currentEvents = events;
-      //console.log(this.currentEvents);
-    },
+    // handleEvents(events) {
+    //   //事件设置成功时的函数
+    //   //console.log(events[events.length - 1]);
+
+    //   for (var i in events) {
+    //     if (events[i].extendedProps.state==0) {
+    //       this.currentEvents.push({
+    //         id: events[i].id,
+    //         title: events[i].title,
+    //         startStr:
+    //           events[i].startStr,
+    //         endStr:
+    //           events[i].endStr,
+
+    //       });
+    //     }
+    //   }
+
+    //   //console.log(this.currentEvents);
+    // },
 
     handleEventChange(clickInfo) {
+      if (
+        clickInfo.event.startStr == clickInfo.oldEvent.startStr &&
+        clickInfo.event.endStr == clickInfo.oldEvent.endStr
+      ) {
+        return;
+      }
       console.log(clickInfo);
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id: clickInfo.event.id,
+            date1: clickInfo.event.startStr.slice(0, 10),
+            time_start1: clickInfo.event.startStr.slice(11, 19),
+            time_end1: clickInfo.event.endStr.slice(11, 19),
+            detail: clickInfo.event.title,
+            type: clickInfo.event.extendedProps.type,
+            sta: clickInfo.event.extendedProps.state,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          //console.log(res);
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.updateUnfinished(
+        clickInfo.event.id,
+        clickInfo.event.title,
+        clickInfo.event.startStr,
+        clickInfo.event.endStr
+      );
     },
   },
 };
