@@ -15,7 +15,7 @@
             "
           ></div>
           <div style="float: left;margin-right: 20px;font-size: 28px; ">
-            XX医院
+            黄渡理工职业技术学校附属医院
           </div>
           <el-link 
           type="primary"
@@ -40,49 +40,61 @@
           src="../../public/test.jpg" 
           style="width: 30%; float: left;"
           >
-          <div style="float:left;">
+          <div style="float:left;margin:30px">
             <h1>{{organName}}</h1>
-            <p>吧啦吧啦吧啦吧啦简介</p>
           </div>
         </el-card>
         <div v-for="(doctor) in doctors">
-          <el-card style="width:70%; margin:auto;margin-top:15px">
-            <div style="height:120px">
-                <img 
-                src="../../public/test.jpg" 
-                style="height: 70%; float: left; margin:15px"
-                >
-                <div style="float: left; margin:15px">
-                  <p>{{doctor.name}}</p>
-                  <p>{{doctor.tittle}}</p>
-                </div>
-                <p style="float: left; margin:15px">空闲时间</p>
-                <el-button 
-                @click="handleClick(doctor)"
-                type="primary" 
-                style="margin-left: 16px;float: right;">
-                    预约
-                </el-button>
+          <el-card style="width:75%; margin:auto;margin-top:15px;">
+            <div style="width: 30%;float:left;margin-right:10px">
+              <img 
+              src="../../public/test.jpg" 
+              style="width: 80%;">
+              <div style="text-align:center">
+                <p>{{doctor.name}}  {{doctor.position}}</p>
+              </div>
             </div>
-            <el-divider></el-divider>
-            <p>
+            <div 
+            style="
+              width: 60%;
+              float:left;
+              text-align:left;
+              margin-right:10px;
+              word-wrap: break-word
+            ">
               {{doctor.intro}}
-            </p>
+            </div>
+            <div style="float:right;margin-top:15px">
+              <el-button 
+              @click="handleClick(doctor)"
+              type="primary" 
+              >
+                预约
+              </el-button>
+            </div>
           </el-card>
         </div>
-        
         <el-drawer
         title="预约医生"
         :visible.sync="drawer"
         :direction="direction"
         :before-close="handleClose">
           <div>
-            {{organName}}
-            {{currentDoctor.tittle}}
-            {{currentDoctor.name}}
-            选择时间
+            <h1>您选择的医生是:</h1>
+            <p>{{organName}}  {{currentDoctor.position}}  {{currentDoctor.name}}</p>
           </div>
-          <div>
+          <div style="margin-top:40px">
+            <h1>请选择时间:</h1>
+             <el-select v-model="value" placeholder="请选择">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </div>
+          <div style="position:fixed; bottom:30px;right:180px">
             <el-button type="primary">
               预约
             </el-button>
@@ -102,33 +114,56 @@ export default {
   name: 'Organ',
   data() {
       return {
-        organName:'XX科',
+        organName:'',
         drawer: false,
         direction: 'rtl',
         doctors:[
           {
             id:1,
             name:'名字',
-            tittle:'主任医师',
-            intro:'简介'
+            position:'主任医师',
+            intro:'简介jhnfbggggggggggggggggggggggggggggggggggggggggggggggggggggggssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss'
           },
           {
             id:2,
             name:'名字2',
-            tittle:'主任医师2',
+            position:'主任医师2',
             intro:'简介2'
           },
         ],
+        options: [{
+          value: '选项1',
+          label: '黄金糕'
+        }, {
+          value: '选项2',
+          label: '双皮奶'
+        }, {
+          value: '选项3',
+          label: '蚵仔煎'
+        }, {
+          value: '选项4',
+          label: '龙须面'
+        }, {
+          value: '选项5',
+          label: '北京烤鸭'
+        }],
+        value:'',
         currentDoctor:[]
       };
   },
+  created(){
+    this.getOrgan();
+  },
   methods: {
+    getOrgan(){
+      this.organName=this.$route.query.name;
+    },
     handleClick(doctor){
       this.drawer=true;
       console.log(doctor.id);
       this.currentDoctor.id=doctor.id;
       this.currentDoctor.name=doctor.name;
-      this.currentDoctor.tittle=doctor.tittle;
+      this.currentDoctor.position=doctor.position;
     },
     handleClose(done) {
       this.$confirm('确认关闭？')
@@ -136,7 +171,22 @@ export default {
             done();
         })
         .catch(_ => {});
-    }
+    },
+    // getDoctorInfo(){
+    //   const doctorsInfo=[];
+    //   axios
+    //     .get("", {
+    //       params: {
+            
+    //       },
+    //     })
+    //     .then((res) => {
+    //       console.log(res);
+    //     })
+    //     .catch(function (error) {
+    //       console.log(error);
+    //     });
+    // }
   }
 }
 

@@ -15,7 +15,7 @@
             "
           ></div>
           <div style="float: left;margin-right: 20px;font-size: 28px; ">
-            XX医院
+            黄渡理工职业技术学校附属医院
           </div>
           <el-link 
           type="primary"
@@ -41,7 +41,7 @@
           style="width: 30%; float: left;"
           >
           <div style="float:left;">
-            <h1>XX医院</h1>
+            <h1>黄渡理工职业技术学校附属医院</h1>
             <p>吧啦吧啦吧啦吧啦简介</p>
           </div>
           <!-- <el-button 
@@ -59,7 +59,13 @@
         <el-card style="margin:auto; margin-top: 15px; width:80%">
           <el-collapse accordion>
             <el-collapse-item title="预约规则">
-              <div>{{rules}}</div>
+              <div style="margin-left:60px; margin-right:60px; text-align:left">
+                <div style="margin-top:10px">{{rule1}}</div>
+                <div style="margin-top:10px">{{rule2}}</div>
+                <div style="margin-top:10px">{{rule3}}</div>
+                <div style="margin-top:10px">{{rule4}}</div>
+                <div style="margin-top:10px">{{rule5}}</div>
+              </div>
             </el-collapse-item>
           </el-collapse>
         </el-card>
@@ -68,7 +74,7 @@
             <el-tab-pane label="挂号科室" name="first">
               <div style="margin-left:60px;margin-right:60px">
                 <p v-for="(organ) in organs">
-                  <router-link :to="{name:'organ',params:{id:organ.id}}"
+                  <router-link :to="{name:'organ',query:{name:organ.name}}"
                   style="margin-left:60px;margin-right:60px;float:left;width:20%">
                     {{organ.name}}
                   </router-link>
@@ -100,7 +106,11 @@ export default {
   data() {
     return {
       activeName: 'first',
-      rules:'与现实生活一致：与现实生活的流程、逻辑保持一致，遵循用户习惯的语言和概念；在界面中一致：所有的元素和结构需保持一致，比如：设计样式、图标和文本、元素的位置等。',
+      rule1:'1.所有科室均提前7天放号，每日7：00更新号源。我院官方微信公众号已开通“关注号源放号通知”，当余号为0时，可进入医生详情页订阅有号通知，系统会在号源开放时向您发送通知。请提前预约挂号，合理安排出行时间。',
+      rule2:'2.预约挂号采取实名制，一位患者每日最多只能预约三个科室的医生，一个科室仅能预约一名医生。',
+      rule3:'3.提交预约申请后，本平台会向您发送预约成功或失败的信息，如果没有收到上述信息，建议您拨打023-68370568进行核实。',
+      rule4:'4.预约成功后，请您带齐所需资料，按照预约时间提前30分钟到达医院签到或取号。迟到30分钟以内，系统自动排至队列最后一位；若迟到30分钟以上，本次预约作废。',
+      rule5:'5.预约成功后，若医生因故不能按时接诊，由其他医生替诊的，系统会自动推送停换诊消息，若您同意换诊，请点击换号并付费，则保留原预约就诊序号，原挂号费自动返回您账户；若您不愿意接受换诊医生的诊疗，请点击退号。若无换诊医生，则需退号后另行预约，不便之处敬请谅解。',
       organs:[
         {
           id:1,
