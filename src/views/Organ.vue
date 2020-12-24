@@ -88,23 +88,11 @@
           <div style="margin-top:40px">
             <h1>请选择预约时间:</h1>
             <div style="margin-top:30px">
-              <span>日期 </span>
-              <el-date-picker
-                v-model="dateValue"
-                type="date"
-                placeholder="选择日期">
-              </el-date-picker>
-            </div>
-            <div style="margin-top:30px">
-              <span>时间 </span>
-              <el-select v-model="timeValue" placeholder="请选择时间">
-                <el-option
-                  v-for="item in options"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
+              <el-cascader
+                v-model="value"
+                :options="options"
+                :props="{ expandTrigger: 'hover' }">
+              </el-cascader>
             </div>
           </div>
           <div style="position:fixed; bottom:30px;right:180px">
@@ -134,21 +122,9 @@ export default {
         drawer: false,
         direction: 'rtl',
         doctors:[],
-        options: [{
-          value: '1',
-          label: '上午'
-        }, {
-          value: '2',
-          label: '下午'
-        }],
-        timeValue:'',
+        options: [],
+        value:'',
         currentDoctor:[],
-        pickerOptions: {
-          disabledDate(time) {
-            return time.getTime() > Date.now();
-          },
-        },
-        dateValue: '',
       };
   },
   created(){
@@ -163,10 +139,69 @@ export default {
     //获取要预约的医生信息
     handleClick(doctor){
       this.drawer=true;
-      // console.log(doctor.id);
       this.currentDoctor.id=doctor.id;
       this.currentDoctor.name=doctor.name;
       this.currentDoctor.position=doctor.position;
+      axios
+        .get("http://localhost:8081/patient/get_doctor_time",{
+          params:{
+            doctor_id:doctor.id
+          }
+        })
+        .then((res) => {
+          for(let i = 0; i<res.data.time_uses.length; i++){
+            let tmp = res.data.time_uses[i].date;
+            let tmpTime = res.data.time_uses[i].item;
+            for(let j = 0; j<this.options.length; j++){
+              if(this.options[j].label == tmp){
+                if((this.options[j].children.length == 1 && this.options[j].children[0].value != tmpTime)||this.options[j].children.length == 0){
+                  if(tmpTime == 1){
+                    this.options[j].children.push({
+                      value:tmpTime,
+                      label:'上午'
+                    })
+                  }else{
+                    this.options[j].children.push({
+                      value:tmpTime,
+                      label:'下午'
+                    })
+                  }
+                }
+              }
+            }
+            let newDay =true;
+            for(let j = 0; j<this.options.length; j++){
+              if(tmp == this.options[j].label){
+                newDay = false;
+              }
+            }
+            if(newDay){
+              if(tmpTime == 1){
+                this.options.push({
+                  value:tmp,
+                  label:tmp,
+                  children:[{
+                    value:tmpTime,
+                    label:'上午'
+                  }]
+                })
+              }else{
+                this.options.push({
+                  value:tmp,
+                  label:tmp,
+                  children:[{
+                    value:tmpTime,
+                    label:'下午'
+                  }]
+                })
+              }
+            }
+          }
+          // console.log(this.options)
+        })
+        .catch(function (error){
+          console.log(error);
+        })
     },
     //关闭预约drawer
     handleClose(done) {
@@ -202,15 +237,35 @@ export default {
     },
     //drawer中预约按钮的回调函数
     order(){
-      console.log(this.timeValue);
-      console.log(this.dateValue);
-      if(this.timeValue != '' && this.dateValue != ''){
-        this.$message({
-          showClose: true,
-          message: '恭喜您，预约成功！',
-          type: 'success'
-        });
-        this.drawer=false;
+      if(this.value.length==2){
+         axios
+          .get("http://localhost:8081/patient/getready",{
+            params:{
+              doctor_id:this.currentDoctor.id,
+              d:this.value[0],
+              number:this.value[1]
+            }
+          })
+          .then((res) => {
+            if(res.data.state == 'success'){
+              this.$message({
+                showClose: true,
+                message: '恭喜您，预约成功！',
+                type: 'success'
+              });
+              this.drawer=false;
+            }else{
+              this.$message({
+                showClose: true,
+                message: '啊哦，预约失败了。',
+                type: 'warning'
+              });
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          })
+        
       }else{
         this.$message({
           showClose: true,
@@ -219,7 +274,6 @@ export default {
         });
       }
     }
-
   }
 }
 
