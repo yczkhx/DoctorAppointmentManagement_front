@@ -38,11 +38,18 @@
         >
           <img 
           src="../../public/test.jpg" 
-          style="width: 30%; float: left;"
+          style="width: 25%; float: left;margin:30px"
           >
-          <div style="float:left;">
+          <div style="float:left;width:65%;text-align:left">
             <h1>黄渡理工职业技术学校附属医院</h1>
-            <p>吧啦吧啦吧啦吧啦简介</p>
+            <div style="text-indent:30px">
+              <p>上海市黄渡理工职业技术学校附属医院位于上海市嘉定区曹安公路4800号，占地62亩，
+                建筑面积近10万平方米，是一所集医疗、教学、科研、预防为一体的三级甲等综合性医院，是上海市医保定点单位,
+                是国家临床药物试验机构、卫生部专科医师培训基地、上海市住院医师规范化培养和全科医师培养临床基地。</p>
+              <p>医院床位1100张，配备3.0T MRI、320排CT、带PET功能的单光子双探头可变角ECT、DSA，、直线加速器，
+                模拟定位机，辅助治疗计划系统、切割机、模室、进口的基因扩增仪、
+                各类进口全自动生化、免疫、血液、尿液、血凝、细菌培养以及药敏鉴定等大型分析仪等实验设备。</p>
+            </div>
           </div>
           <!-- <el-button 
           type="primary"
@@ -75,8 +82,14 @@
               <div style="margin-left:60px;margin-right:60px">
                 <p v-for="(organ) in organs">
                   <router-link :to="{name:'organ',query:{name:organ.name}}"
-                  style="margin-left:60px;margin-right:60px;float:left;width:20%">
-                    {{organ.name}}
+                  style="
+                    margin-left:60px;
+                    margin-right:60px;
+                    float:left;
+                    width:20%;
+                    text-decoration: none
+                  ">
+                    <p>{{organ.name}}</p>
                   </router-link>
                 </p>
               </div>
@@ -92,6 +105,7 @@
             </el-tab-pane>
           </el-tabs>
         </el-card>
+        <p style="margin-top:30px">Copyright &copy; 黄渡理工职业技术学校附属医院</p>
       </el-main>
     </el-container>
   </div>
@@ -153,6 +167,6 @@ export default {
   .el-main{
     width: 100%;
     margin: 0 auto;
-    background-color: #E9EEF3;
+    background-color: RGB(248,248,248);
   }
 </style>

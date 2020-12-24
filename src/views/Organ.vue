@@ -38,29 +38,31 @@
         >
           <img 
           src="../../public/test.jpg" 
-          style="width: 30%; float: left;"
+          style="width: 15%; float: left;margin:30px"
           >
-          <div style="float:left;margin:30px">
+          <div style="float:left;margin:30px;font-size:25px">
             <h1>{{organName}}</h1>
           </div>
         </el-card>
         <div v-for="(doctor) in doctors">
           <el-card style="width:75%; margin:auto;margin-top:15px;">
-            <div style="width: 30%;float:left;margin-right:10px">
+            <div style="width: 20%;float:left;margin-right:10px">
               <img 
               v-bind:src="doctor.pic"
-              style="width: 80%;">
+              style="width:90%">
               <div style="text-align:center">
                 <p>{{doctor.name}}  {{doctor.position}}</p>
               </div>
             </div>
             <div 
             style="
-              width: 60%;
+              width: 70%;
               float:left;
               text-align:left;
-              margin-right:10px;
-              word-wrap: break-word
+              margin:10px;
+              margin-bottom:30px;
+              word-wrap: break-word;
+              text-indent:30px
             ">
               {{doctor.intro}}
             </div>
