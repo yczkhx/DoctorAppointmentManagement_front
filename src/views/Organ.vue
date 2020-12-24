@@ -48,7 +48,7 @@
           <el-card style="width:75%; margin:auto;margin-top:15px;">
             <div style="width: 30%;float:left;margin-right:10px">
               <img 
-              src="../../public/test.jpg" 
+              v-bind:src="doctor.pic"
               style="width: 80%;">
               <div style="text-align:center">
                 <p>{{doctor.name}}  {{doctor.position}}</p>
@@ -109,6 +109,7 @@
 // @ is an alias to /src
 import HelloWorld from '@/components/HelloWorld.vue'
 import Element from 'element-ui'
+import axios from 'axios';
 
 export default {
   name: 'Organ',
@@ -117,20 +118,7 @@ export default {
         organName:'',
         drawer: false,
         direction: 'rtl',
-        doctors:[
-          {
-            id:1,
-            name:'名字',
-            position:'主任医师',
-            intro:'简介jhnfbggggggggggggggggggggggggggggggggggggggggggggggggggggggssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss'
-          },
-          {
-            id:2,
-            name:'名字2',
-            position:'主任医师2',
-            intro:'简介2'
-          },
-        ],
+        doctors:[],
         options: [{
           value: '选项1',
           label: '黄金糕'
@@ -153,6 +141,7 @@ export default {
   },
   created(){
     this.getOrgan();
+    this.getDoctorInfo();
   },
   methods: {
     getOrgan(){
@@ -172,21 +161,29 @@ export default {
         })
         .catch(_ => {});
     },
-    // getDoctorInfo(){
-    //   const doctorsInfo=[];
-    //   axios
-    //     .get("", {
-    //       params: {
-            
-    //       },
-    //     })
-    //     .then((res) => {
-    //       console.log(res);
-    //     })
-    //     .catch(function (error) {
-    //       console.log(error);
-    //     });
-    // }
+    getDoctorInfo(){
+      axios
+        .get("http://localhost:8081/patient/doctor_info", {
+          params: {
+            dep:this.organName
+          },
+        })
+        .then((res) => {
+          console.log(res);
+          for(let i=0;i<res.data.length;i++){
+            this.doctors.push({
+              id:res.data[i].id,
+              name:res.data[i].name,
+              position:res.data[i].position,
+              intro:res.data[i].detail,
+              pic:res.data[i].pic
+            })
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
   }
 }
 

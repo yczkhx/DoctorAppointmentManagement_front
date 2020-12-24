@@ -114,15 +114,23 @@ export default {
       organs:[
         {
           id:1,
-          name:'外科',
+          name:'普通外科',
         },
         {
           id:2,
-          name:'内科',
+          name:'神经内科',
         },
         {
           id:3,
-          name:'产科',
+          name:'心血管内科',
+        },
+        {
+          id:4,
+          name:'肾脏内科',
+        },
+        {
+          id:3,
+          name:'消化内科',
         }
       ]
     };
