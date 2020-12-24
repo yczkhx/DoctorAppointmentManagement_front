@@ -38,6 +38,9 @@
         <div class="demo-app">
           <el-card class="box-card">
             <div class="demo-app-sidebar">
+              <div style="margin-bottom: 50px">
+          <el-page-header @back="goBack" content="门诊时间管理"> </el-page-header>
+        </div>
               <div class="demo-app-sidebar-section">
                 <h2>Set Timetable</h2>
                 <ul>
@@ -53,6 +56,7 @@
                   placeholder="请选择"
                   style="margin-top: 80px"
                   clearable
+                  :change="changePage()"
                 >
                   <el-option
                     v-for="item in options"
@@ -66,7 +70,11 @@
             </div>
           </el-card>
           <div class="demo-app-main">
-            <FullCalendar class="demo-app-calendar" :options="calendarOptions">
+            <FullCalendar
+              class="demo-app-calendar"
+              ref="ca"
+              :options="calendarOptions"
+            >
               <template v-slot:eventContent="arg">
                 <b>{{ arg.timeText }}</b>
                 <i>{{ arg.event.title }}</i>
@@ -74,10 +82,14 @@
             </FullCalendar>
           </div>
         </div>
-        <el-dialog title="提示" :visible.sync="visible" width="20%">
-          <span>确定选取这个时间段吗？</span>
+        <el-dialog title="提示" :visible.sync="visible" width="25%">
+          <span>请选取要设置的时间段</span>
+          <div style="margin-top:30px">
+            <el-radio v-model="radio1" label="1" border>上午</el-radio>
+            <el-radio v-model="radio1" label="2" border>下午</el-radio>
+          </div>
           <span slot="footer" class="dialog-footer">
-            <el-button @click="visible = false">取 消</el-button>
+            
             <el-button type="primary" @click="settheTime()">确 定</el-button>
           </span>
         </el-dialog>
@@ -108,17 +120,19 @@ export default {
     FullCalendar, // make the <FullCalendar> tag available
   },
 
+  inject: ["reload"],
   data: function () {
     return {
       calendarOptions: {
         plugins: [
           timeGridPlugin,
+          interactionPlugin,
           // needed for dateClick
         ],
         headerToolbar: {
-          left: "",
+          left: "prev,next today",
           center: "title",
-          right: "timeGridWeek",
+          right: "",
         },
         locale: "zh",
         initialView: "timeGridWeek",
@@ -152,6 +166,7 @@ export default {
         //snapDuration: "00:10",
         //select: this.handleDateSelect,
         eventClick: this.handleEventClick,
+        dateClick: this.handleDateClick,
         //eventsSet: this.handleEvents,
         //eventChange: this.handleEventChange,
         //eventDataTransform: this.tranform,
@@ -164,11 +179,12 @@ export default {
       },
       options: this.allmembers(),
       value: "",
+      radio1: "1",
       visible: false,
       currentEvents: [],
       nowClickInfo: [],
       newEventSelectInfo: [],
-      newCalendar: "",
+      newCalendar: true,
       nowCalendar: "",
     };
   },
@@ -178,118 +194,148 @@ export default {
   },
   methods: {
     forINITIAL_EVENTS() {
-      var Events = [
-        {
-          id: "0",
-          title: "门诊",
-          start: "2020-12-21T08:00:00",
-          end: "2020-12-21T11:30:00",
-          color: "#ff9569",
-        },
-        {
-          id: "1",
-          title: "门诊",
-          start: "2020-12-21T14:00:00",
-          end: "2020-12-21T17:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "2",
-          title: "门诊",
-          start: "2020-12-22T08:00:00",
-          end: "2020-12-22T11:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "3",
-          title: "门诊",
-          start: "2020-12-22T14:00:00",
-          end: "2020-12-22T17:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "4",
-          title: "门诊",
-          start: "2020-12-23T08:00:00",
-          end: "2020-12-23T11:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "5",
-          title: "门诊",
-          start: "2020-12-23T14:00:00",
-          end: "2020-12-23T17:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "6",
-          title: "门诊",
-          start: "2020-12-24T08:00:00",
-          end: "2020-12-24T11:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "7",
-          title: "门诊",
-          start: "2020-12-24T14:00:00",
-          end: "2020-12-24T17:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "8",
-          title: "门诊",
-          start: "2020-12-25T08:00:00",
-          end: "2020-12-25T11:30:00",
-          color: "#409EFF",
-        },
-        {
-          id: "9",
-          title: "门诊",
-          start: "2020-12-25T14:00:00",
-          end: "2020-12-25T17:30:00",
-          color: "#409EFF",
-        },
-      ];
+      var Events = [];
+      axios
+        .get("http://localhost:8081/doctor/get_time", {})
+        .then((res) => {
+          console.log(res);
+          for (var i in res.data) {
+            var thiscolor = "#409EFF";
+            if (res.data[i].counting == 1) {
+              thiscolor = "#ff9569";
+            }
+            if (res.data[i].counting > 1) {
+              thiscolor = "#F56C6C";
+            }
+            if (res.data[i].item_id == 1) {
+              Events.push({
+                id: i,
+                title: "门诊",
+                start: res.data[i].date + "T08:00:00",
+                end: res.data[i].date + "T11:30:00",
+                color: thiscolor,
+              });
+            } else if (res.data[i].item_id == 2) {
+              Events.push({
+                id: i,
+                title: "门诊",
+                start: res.data[i].date + "T14:00:00",
+                end: res.data[i].date + "T17:30:00",
+                color: thiscolor,
+              });
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      //console.log(Events)
+
       return Events;
     },
-    handleEventClick(clickInfo) {
-      console.log(clickInfo);
-      this.visible = true;
-      this.nowClickInfo = clickInfo.event;
-      this.nowCalendar = clickInfo.view.calendar;
+
+    changePage() {
+      //console.log(this.value);
+      //写切换
+      if(this.value==""){
+        this.calendarOptions.events=this.forINITIAL_EVENTS();
+      }
+
+      if (this.value != "") {
+        axios
+          .get("http://localhost:8081/patient/get_doctor_time", {
+            params: {
+              doctor_id: this.value,
+            },
+          })
+          .then((res) => {
+            console.log(res);
+            this.calendarOptions.events = [];
+            for (var i in res.data.time_uses)
+              if (res.data.time_uses[i].item == 1) {
+                this.calendarOptions.events.push({
+                  id: i,
+                  title: "门诊",
+                  start: res.data.time_uses[i].date + "T08:00:00",
+                  end: res.data.time_uses[i].date + "T11:30:00",
+                  color: "#ff9569",
+                });
+              } else if (res.data.time_uses[i].item == 2) {
+                this.calendarOptions.events.push({
+                  id: i,
+                  title: "门诊",
+                  start: res.data.time_uses[i].date + "T14:00:00",
+                  end: res.data.time_uses[i].date + "T17:30:00",
+                  color: "#ff9569",
+                });
+              }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
     },
-    settheTime() {
+
+    handleDateClick(dateClickInfo) {
+      console.log(dateClickInfo);
+      this.visible = true;
+      this.nowClickInfo = dateClickInfo;
+      this.nowCalendar = dateClickInfo.view.calendar;
       if (this.value == "") {
         this.$message.error("请选择你要添加的人员");
         this.visible = false;
         return;
       }
-      this.nowCalendar
-        .getEventById(this.nowClickInfo.id)
-        .setProp("title", '已分配'); //修改标题
-        this.nowCalendar
-        .getEventById(this.nowClickInfo.id)
-        .setProp("color", '#ff9569'); //修改标题
+    },
+
+    // handleEventClick(clickInfo) {
+    //   //console.log(this.$refs.ca.getApi())
+    //   //this.$refs.ca.FullCalendar( 'refetchEvents')
+    //   //$('#ca').fullCalendar('refetchEvents');
+    //   //this.reload();
+
+    //   console.log(clickInfo);
+    //   this.visible = true;
+    //   this.nowClickInfo = clickInfo.event;
+    //   this.nowCalendar = clickInfo.view.calendar;
+    // },
+    settheTime() {
       var num = "";
-      if (this.nowClickInfo.startStr.slice(11, 19) == "08:00:00") {
+      if (this.radio1=='1') {
         num = 1;
-      } else if (this.nowClickInfo.startStr.slice(11, 19) == "14:00:00") {
+        this.calendarOptions.events.push({
+        id: this.nowClickInfo.dateStr,
+        title: "已分配",
+        start: this.nowClickInfo.dateStr.slice(0, 10) + "T08:00:00",
+        end: this.nowClickInfo.dateStr.slice(0, 10) + "T11:30:00",
+        color: "#ff9569",
+      });
+      } else if (this.radio1=='2') {
         num = 2;
+        this.calendarOptions.events.push({
+        id: this.nowClickInfo.dateStr,
+        title: "已分配",
+        start: this.nowClickInfo.dateStr.slice(0, 10) + "T14:00:00",
+        end: this.nowClickInfo.dateStr.slice(0, 10) + "T17:30:00",
+        color: "#ff9569",
+      });
       }
       axios
         .get("http://localhost:8082/doctor/arr", {
           params: {
             doctor_id: this.value,
             number: num,
-            date1: this.nowClickInfo.startStr.slice(0, 10),
+            date1: this.nowClickInfo.dateStr.slice(0, 10),
           },
         })
         .then((res) => {
-          console.log(res);
+          //console.log(res);
+          this.changePage();
         })
         .catch(function (error) {
           console.log(error);
         });
+        
       this.visible = false;
     },
 
@@ -314,6 +360,9 @@ export default {
           console.log(error);
         });
       return Members;
+    },
+    goBack() {
+      this.$router.push("/about");
     },
   },
 };

@@ -71,8 +71,11 @@
             </div>
 
             <div style="position: fixed; bottom: 0">
-              <el-button type="primary" @click="gotoOpera()"
+              <el-button type="primary" @click="gotoOpera()" style="width:120px"
                 >创建合作项目</el-button
+              >
+              <el-button type="primary" @click="gotoAdmin()" style="width:120px"
+                >管理门诊时间</el-button
               >
             </div>
           </el-card>
@@ -272,7 +275,7 @@ export default {
       axios
         .get("http://localhost:8082/doctor/as", {
           params: {
-            id: 1,
+            id: 2020001,
           },
         })
         .then((res) => {
@@ -522,7 +525,7 @@ export default {
         axios
           .get("http://localhost:8082/doctor/delete", {
             params: {
-              id: "1",
+              id: "2020001",
               activity_id: this.nowclickinfo.event.id,
             },
           })
@@ -717,6 +720,9 @@ export default {
 
     gotoOpera() {
       this.$router.push("/opera");
+    },
+    gotoAdmin() {
+      this.$router.push("/admin");
     },
 
     // handleEvents(events) {

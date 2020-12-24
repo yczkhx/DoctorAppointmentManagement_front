@@ -32,7 +32,7 @@
           :body-style="{ padding: '0px' }"
           style="width: 80%; margin: auto"
         >
-          <img src="../../public/test.jpg" style="width: 30%; float: left" />
+          <img  style="width: 30%; float: left" />
           <div style="float: left">
             <h1>马文博医院</h1>
             <p>吧啦吧啦吧啦吧啦简介</p>
