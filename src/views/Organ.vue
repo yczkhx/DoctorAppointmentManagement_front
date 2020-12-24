@@ -142,6 +142,8 @@ export default {
       this.currentDoctor.id=doctor.id;
       this.currentDoctor.name=doctor.name;
       this.currentDoctor.position=doctor.position;
+      this.options=[];
+      this.value=''
       axios
         .get("http://localhost:8081/patient/get_doctor_time",{
           params:{
