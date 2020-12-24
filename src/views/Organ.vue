@@ -66,7 +66,7 @@
             ">
               {{doctor.intro}}
             </div>
-            <div style="float:right;margin-top:15px">
+            <div style="float:right;margin-top:15px;margin-bottom:20px">
               <el-button 
               @click="handleClick(doctor)"
               type="primary" 
@@ -86,18 +86,31 @@
             <p>{{organName}}  {{currentDoctor.position}}  {{currentDoctor.name}}</p>
           </div>
           <div style="margin-top:40px">
-            <h1>请选择时间:</h1>
-             <el-select v-model="value" placeholder="请选择">
-              <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <h1>请选择预约时间:</h1>
+            <div style="margin-top:30px">
+              <span>日期 </span>
+              <el-date-picker
+                v-model="dateValue"
+                type="date"
+                placeholder="选择日期">
+              </el-date-picker>
+            </div>
+            <div style="margin-top:30px">
+              <span>时间 </span>
+              <el-select v-model="timeValue" placeholder="请选择时间">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </div>
           </div>
           <div style="position:fixed; bottom:30px;right:180px">
-            <el-button type="primary">
+            <el-button 
+            type="primary"
+            @click="order()">
               预约
             </el-button>
           </div>
@@ -122,23 +135,20 @@ export default {
         direction: 'rtl',
         doctors:[],
         options: [{
-          value: '选项1',
-          label: '黄金糕'
+          value: '1',
+          label: '上午'
         }, {
-          value: '选项2',
-          label: '双皮奶'
-        }, {
-          value: '选项3',
-          label: '蚵仔煎'
-        }, {
-          value: '选项4',
-          label: '龙须面'
-        }, {
-          value: '选项5',
-          label: '北京烤鸭'
+          value: '2',
+          label: '下午'
         }],
-        value:'',
-        currentDoctor:[]
+        timeValue:'',
+        currentDoctor:[],
+        pickerOptions: {
+          disabledDate(time) {
+            return time.getTime() > Date.now();
+          },
+        },
+        dateValue: '',
       };
   },
   created(){
@@ -146,16 +156,19 @@ export default {
     this.getDoctorInfo();
   },
   methods: {
+    //由主界面拿到顶部的科室名称
     getOrgan(){
       this.organName=this.$route.query.name;
     },
+    //获取要预约的医生信息
     handleClick(doctor){
       this.drawer=true;
-      console.log(doctor.id);
+      // console.log(doctor.id);
       this.currentDoctor.id=doctor.id;
       this.currentDoctor.name=doctor.name;
       this.currentDoctor.position=doctor.position;
     },
+    //关闭预约drawer
     handleClose(done) {
       this.$confirm('确认关闭？')
         .then(_ => {
@@ -163,6 +176,7 @@ export default {
         })
         .catch(_ => {});
     },
+    //创建页面时调用的，获取整个科室的医生信息
     getDoctorInfo(){
       axios
         .get("http://localhost:8081/patient/doctor_info", {
@@ -185,7 +199,27 @@ export default {
         .catch(function (error) {
           console.log(error);
         });
+    },
+    //drawer中预约按钮的回调函数
+    order(){
+      console.log(this.timeValue);
+      console.log(this.dateValue);
+      if(this.timeValue != '' && this.dateValue != ''){
+        this.$message({
+          showClose: true,
+          message: '恭喜您，预约成功！',
+          type: 'success'
+        });
+        this.drawer=false;
+      }else{
+        this.$message({
+          showClose: true,
+          message: '请选择预约时间和日期。',
+          type: 'warning'
+        });
+      }
     }
+
   }
 }
 
