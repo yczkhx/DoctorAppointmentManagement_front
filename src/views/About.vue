@@ -72,7 +72,7 @@
 
             <div style="position: fixed; bottom: 0">
               <el-button type="primary" @click="gotoOpera()" style="width:120px"
-                >创建合作项目</el-button
+                >管理合作项目</el-button
               >
               <el-button type="primary" @click="gotoAdmin()" style="width:120px"
                 >管理门诊时间</el-button
@@ -369,8 +369,8 @@ export default {
         this.neweventstart = selectInfo.startStr.slice(11, 19);
         this.neweventend = selectInfo.endStr.slice(11, 19);
       } else {
-        this.neweventstart = "";
-        this.neweventend = "";
+        this.neweventstart = null;
+        this.neweventend = null;
       }
       //console.log(this.neweventstart)
       //console.log(this.neweventend)
@@ -467,10 +467,11 @@ export default {
 
       this.nowCalendar = clickInfo.view.calendar;
       if (this.nowclickinfo.event.extendedProps.type == "1") {
-        console.log("aaaa");
-        this.unfinished = true;
-        this.finished = true;
-        this.unChangeTitle = true;
+        //console.log("aaaa");
+        //this.unfinished = true;
+        //this.finished = true;
+        //this.unChangeTitle = true;
+        this.$router.push("/opera");
       }
       //console.log(this.nowclickinfo.event.extendedProps.text);
       //console.log(this.eventText);
@@ -506,22 +507,6 @@ export default {
     deletethisevent() {
       //删除事件
       this.nowclickinfo.event.remove();
-      if (this.nowclickinfo.event.extendedProps.type == "1") {
-        console.log("在这里写删除");
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-      } else {
         axios
           .get("http://localhost:8082/doctor/delete", {
             params: {
@@ -538,7 +523,7 @@ export default {
           .catch(function (error) {
             console.log(error);
           });
-      }
+      
 
       this.dialogVisible = false;
     },
@@ -548,28 +533,7 @@ export default {
       // console.log("修改");
       //console.log(this.nowclickinfo.event);
       // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
-      if (this.nowclickinfo.event.extendedProps.type == "1") {
-        console.log("另写函数写修改");
-        this.drawer = true;
-        // //
-        // //
-        // //
-        // //
-        // //
-
-        //写成多个带按钮的框，可以加点击事件，单拉出来写函数就可以
-        //数据可以直接调出来那个全局变量nowclickinfo用
-
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-        // //
-      } else {
+      
         this.nowCalendar
           .getEventById(this.nowclickinfo.event.id)
           .setProp("title", this.eventText); //修改标题
@@ -601,7 +565,7 @@ export default {
           this.nowclickinfo.event.startStr,
           this.nowclickinfo.event.endStr
         );
-      }
+      
 
       this.dialogVisible = false;
     },
