@@ -19,8 +19,9 @@
               font-size: 28px;
               font-family: STCaiyun;
             "
+            @click="backtohome"
           >
-            马文博医院
+            黄渡理工职业技术学校附属医院
           </div>
           <!-- <el-menu-item index="./about" style="float: left;margin: auto;"
             ><div
@@ -71,10 +72,16 @@
             </div>
 
             <div style="position: fixed; bottom: 0">
-              <el-button type="primary" @click="gotoOpera()" style="width:120px"
+              <el-button
+                type="primary"
+                @click="gotoOpera()"
+                style="width: 120px"
                 >管理合作项目</el-button
               >
-              <el-button type="primary" @click="gotoAdmin()" style="width:120px"
+              <el-button
+                type="primary"
+                @click="gotoAdmin()"
+                style="width: 120px"
                 >管理门诊时间</el-button
               >
             </div>
@@ -172,6 +179,8 @@ import listPlugin from "@fullcalendar/list";
 //import { INITIAL_EVENTS, createEventId } from './event-utils'
 import Element from "element-ui";
 import axios from "axios";
+//import { EventBus } from "../eventbus.js";
+//import Login from "@/views/Login.vue";
 
 let eventGuid = 0;
 let todayStr = new Date().toISOString().replace(/T.*$/, ""); // YYYY-MM-DD of today
@@ -188,8 +197,11 @@ var EVENTS = [
   },
 ];
 export default {
+  name: "About",
   components: {
-    FullCalendar, // make the <FullCalendar> tag available
+    FullCalendar,
+    
+    // make the <FullCalendar> tag available
   },
 
   data: function () {
@@ -262,15 +274,18 @@ export default {
       neweventend: "",
       drawer: false,
       direction: "btt",
+      thatid: "",
     };
   },
+  created() {},
   mounted() {
-    //this.initialallView();
-    //this.forINITIAL_EVENTS();
+    
   },
 
   methods: {
     forINITIAL_EVENTS() {
+      console.log("aaaaaaaaaaaaaaaaa");
+      console.log(this.thatid);
       var INITIAL_EVENTS = [];
       axios
         .get("http://localhost:8082/doctor/as", {
@@ -507,23 +522,22 @@ export default {
     deletethisevent() {
       //删除事件
       this.nowclickinfo.event.remove();
-        axios
-          .get("http://localhost:8082/doctor/delete", {
-            params: {
-              id: "2020001",
-              activity_id: this.nowclickinfo.event.id,
-            },
-          })
-          .then((res) => {
-            //console.log(thistitle);
-            console.log(res);
+      axios
+        .get("http://localhost:8082/doctor/delete", {
+          params: {
+            id: "2020001",
+            activity_id: this.nowclickinfo.event.id,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res);
 
-            //console.log(event1);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
 
       this.dialogVisible = false;
     },
@@ -533,39 +547,38 @@ export default {
       // console.log("修改");
       //console.log(this.nowclickinfo.event);
       // console.log(this.nowCalendar.getEventById(this.nowclickinfo.event.id))
-      
-        this.nowCalendar
-          .getEventById(this.nowclickinfo.event.id)
-          .setProp("title", this.eventText); //修改标题
 
-        axios
-          .get("http://localhost:8082/doctor/correct", {
-            params: {
-              activity_id: this.nowclickinfo.event.id,
-              date1: this.nowclickinfo.event.startStr.slice(0, 10),
-              time_start1: this.nowclickinfo.event.startStr.slice(11, 19),
-              time_end1: this.nowclickinfo.event.endStr.slice(11, 19),
-              detail: this.eventText,
-              type: this.nowclickinfo.event.extendedProps.type,
-              sta: this.nowclickinfo.event.extendedProps.state,
-            },
-          })
-          .then((res) => {
-            //console.log(thistitle);
-            console.log(res);
+      this.nowCalendar
+        .getEventById(this.nowclickinfo.event.id)
+        .setProp("title", this.eventText); //修改标题
 
-            //console.log(event1);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-        this.updateUnfinished(
-          this.nowclickinfo.event.id,
-          this.eventText,
-          this.nowclickinfo.event.startStr,
-          this.nowclickinfo.event.endStr
-        );
-      
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id: this.nowclickinfo.event.id,
+            date1: this.nowclickinfo.event.startStr.slice(0, 10),
+            time_start1: this.nowclickinfo.event.startStr.slice(11, 19),
+            time_end1: this.nowclickinfo.event.endStr.slice(11, 19),
+            detail: this.eventText,
+            type: this.nowclickinfo.event.extendedProps.type,
+            sta: this.nowclickinfo.event.extendedProps.state,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res);
+
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.updateUnfinished(
+        this.nowclickinfo.event.id,
+        this.eventText,
+        this.nowclickinfo.event.startStr,
+        this.nowclickinfo.event.endStr
+      );
 
       this.dialogVisible = false;
     },
@@ -688,6 +701,11 @@ export default {
     gotoAdmin() {
       this.$router.push("/admin");
     },
+    backtohome() {
+      this.$message.success("跳转至主界面");
+      setTimeout(function () {}, 500);
+      this.$router.push("/");
+    },
 
     // handleEvents(events) {
     //   //事件设置成功时的函数
@@ -719,7 +737,7 @@ export default {
       }
       if (clickInfo.event.extendedProps.type == "1") {
         //
-        console.log('在这里写修改时间的函数')
+        console.log("在这里写修改时间的函数");
         //在这里写修改时间的函数
         //
         //

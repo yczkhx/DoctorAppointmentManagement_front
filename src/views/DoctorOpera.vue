@@ -19,8 +19,9 @@
               font-size: 28px;
               font-family: STCaiyun;
             "
+            @click="backtohome"
           >
-            马文博医院
+            黄渡理工职业技术学校附属医院
           </div>
           <!--新建团队-->
           <el-button type="primary" @click="teamDialogFormVisible = true" style="margin-right: 10px;">新建团队</el-button>
@@ -607,6 +608,11 @@ export default {
 
     goBack() {
       this.$router.push("/about");
+    },
+    backtohome() {
+      this.$message.success("跳转至主界面");
+      setTimeout(function () {}, 500);
+      this.$router.push("/");
     },
   },
 };

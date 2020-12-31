@@ -14,21 +14,23 @@
               margin-top: 12px;
             "
           ></div>
-          <div style="float: left;margin-right: 20px;font-size: 28px; ">
+          <div style="float: left;margin-right: 20px;font-size: 28px; " @click="backtohome">
             黄渡理工职业技术学校附属医院
           </div>
-          <el-link 
-          type="primary"
-          href="#/about"
-          style="float: right;margin-right: 50px;font-size: 16px;"
+          <el-link
+            type="primary"
+            href="#/login"
+            style="float: right; margin-right: 50px; font-size: 16px"
           >
-            我是医生
+            登录
           </el-link>
-          <div
-          style="float: right;margin-right: 50px;font-size: 16px;"
+          <el-link
+            type="primary"
+            href="#/register"
+            style="float: right; margin-right: 50px; font-size: 16px"
           >
-            登录注册
-          </div>
+            注册
+          </el-link>
         </el-menu>
       </el-header>
       <el-main>
@@ -132,6 +134,11 @@ export default {
     this.getDoctorInfo();
   },
   methods: {
+    backtohome() {
+      this.$message.success("跳转至主界面");
+      setTimeout(function () {}, 500);
+      this.$router.push("/");
+    },
     //由主界面拿到顶部的科室名称
     getOrgan(){
       this.organName=this.$route.query.name;
