@@ -206,6 +206,10 @@ export default {
 
   data: function () {
     return {
+      //医生的id和权限
+      myID:'',
+      authority:false,
+
       finished: false,
       unfinished: false,
       unChangeTitle: false,
@@ -277,7 +281,9 @@ export default {
       thatid: "",
     };
   },
-  created() {},
+  created() {
+    this.getID();
+  },
   mounted() {
     
   },
@@ -366,6 +372,12 @@ export default {
       console.log(INITIAL_EVENTS);
 
       return INITIAL_EVENTS;
+    },
+
+    getID(){
+      this.myID=this.$route.query.id;
+      // this.authority=this.$route.query.authority;
+      //这里拿到了医生的id和权限
     },
 
     handleWeekendsToggle() {
