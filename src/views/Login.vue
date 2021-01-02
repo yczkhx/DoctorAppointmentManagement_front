@@ -25,7 +25,7 @@
               type="text"
               v-model="loginForm.username"
               auto-complete="off"
-              placeholder="用户名"
+              placeholder="身份证号"
               v-on:
               keyup.enter.native="login"
             ></el-input>
@@ -129,7 +129,7 @@ export default {
   //回车登录操作
   created() {
     //创建后挂载
-    console.log(this.name);
+    //console.log(this.name);
     let _this = this;
     setTimeout(() => {
       this.loading = false;
@@ -148,11 +148,11 @@ export default {
           },
         })
         .then((res) => {
-          console.log(res);
+          //console.log(res);
           if (res.data.state == "wrong_db") {
-            this.$message.success("请输入正确的用户名");
+            this.$message.error("用户名不存在");
           } else if (res.data.state == "wrong_password") {
-            this.$message.success("密码错误");
+            this.$message.error("密码错误");
           } else if (res.data.state == "success") {
             window.sessionStorage.setItem("token", this.loginForm.username);
 
@@ -183,25 +183,16 @@ export default {
         .then((res) => {
           console.log(res);
           if (res.data.state == "idwrong") {
-            this.$message.success("请输入正确的ID");
+            this.$message.error("请输入正确的ID");
           } else if (res.data.state == "passwrong") {
-            this.$message.success("密码错误");
+            this.$message.error("密码错误");
           } else if (res.data.state == "success") {
-            window.sessionStorage.setItem("token", this.loginForm.doctorName);
-            // EventBus.$emit("test", {
-            //         num:this.loginForm.doctorName,
-            //     });
-            //     console.log(this.loginForm.doctorName)
+            window.sessionStorage.setItem("token", 'aaa');
             this.$message.success("跳转至个人界面");
             setTimeout(function () {}, 500);
             this.$router.push({path:"/about",query:{id:this.loginForm.doctorName}});
             // this.$router.push({path:"/about",query:{id:this.loginForm.doctorName,authority:rea.data.权限}});
           }
-          // this.$message.success("跳转至登录界面");
-          // setTimeout(function () {}, 500);
-          // this.$router.push("/login");
-
-          //console.log(event1);
         })
         .catch(function (error) {
           console.log(error);

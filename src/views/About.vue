@@ -43,7 +43,7 @@
               font-family: FZShuTi;
             "
           >
-            马文博医生，您好
+            {{ myID }}，您好
           </div>
         </el-menu>
       </el-header>
@@ -76,12 +76,14 @@
                 type="primary"
                 @click="gotoOpera()"
                 style="width: 120px"
+                v-if="authority"
                 >管理合作项目</el-button
               >
               <el-button
                 type="primary"
                 @click="gotoAdmin()"
                 style="width: 120px"
+                v-if="authority"
                 >管理门诊时间</el-button
               >
             </div>
@@ -200,15 +202,15 @@ export default {
   name: "About",
   components: {
     FullCalendar,
-    
+
     // make the <FullCalendar> tag available
   },
 
   data: function () {
     return {
       //医生的id和权限
-      myID:'',
-      authority:false,
+      myID: "",
+      authority: false,
 
       finished: false,
       unfinished: false,
@@ -278,34 +280,36 @@ export default {
       neweventend: "",
       drawer: false,
       direction: "btt",
-      thatid: "",
     };
   },
   created() {
     this.getID();
+    window.sessionStorage.setItem("token", 'aaa');
+    //this.forINITIAL_EVENTS();
   },
-  mounted() {
-    
-  },
+  mounted() {},
 
   methods: {
     forINITIAL_EVENTS() {
-      console.log("aaaaaaaaaaaaaaaaa");
-      console.log(this.thatid);
+      //console.log("aaaaaaaaaaaaaaaaa");
+      //console.log(this.thatid);
+      console.log(this.myID);
       var INITIAL_EVENTS = [];
       axios
         .get("http://localhost:8082/doctor/as", {
           params: {
-            id: 2020001,
+            id: this.myID,
           },
         })
         .then((res) => {
-          //console.log(res.data.activities);
+          console.log(res);
           for (var i in res.data.activities) {
             var color = "#409EFF";
+            var edit =true;
 
             if (res.data.activities[i].type == 1) {
               color = "#F56C6C";
+              edit=false;
             }
             if (res.data.activities[i].state == 1) {
               color = "#67C23A";
@@ -319,6 +323,7 @@ export default {
                 title: res.data.activities[i].detail,
                 start: res.data.activities[i].date,
                 color: color,
+                editable:edit,
                 extendedProps: {
                   state: res.data.activities[i].state,
                   type: res.data.activities[i].type,
@@ -339,6 +344,7 @@ export default {
                   "|" +
                   res.data.activities[i].time_end,
                 color: color,
+                editable:edit,
                 extendedProps: {
                   state: res.data.activities[i].state,
                   type: res.data.activities[i].type,
@@ -359,6 +365,7 @@ export default {
                 "T" +
                 res.data.activities[i].time_end,
               color: color,
+              editable:edit,
               extendedProps: {
                 state: res.data.activities[i].state,
                 type: res.data.activities[i].type,
@@ -374,10 +381,91 @@ export default {
       return INITIAL_EVENTS;
     },
 
-    getID(){
-      this.myID=this.$route.query.id;
+    getID() {
+      this.myID = this.$route.query.id;
+      console.log(this.myID);
       // this.authority=this.$route.query.authority;
       //这里拿到了医生的id和权限
+      // console.log(this.myID)
+      // var INITIAL_EVENTS = [];
+      // axios
+      //   .get("http://localhost:8082/doctor/as", {
+      //     params: {
+      //       id: this.myID,
+      //     },
+      //   })
+      //   .then((res) => {
+      //     //console.log(res.data.activities);
+      //     for (var i in res.data.activities) {
+      //       var color = "#409EFF";
+
+      //       if (res.data.activities[i].type == 1) {
+      //         color = "#F56C6C";
+      //       }
+      //       if (res.data.activities[i].state == 1) {
+      //         color = "#67C23A";
+      //       }
+      //       if (
+      //         res.data.activities[i].time_start == null &&
+      //         res.data.activities[i].time_end == null
+      //       ) {
+      //         INITIAL_EVENTS.push({
+      //           id: res.data.activities[i].activity_id,
+      //           title: res.data.activities[i].detail,
+      //           start: res.data.activities[i].date,
+      //           color: color,
+      //           extendedProps: {
+      //             state: res.data.activities[i].state,
+      //             type: res.data.activities[i].type,
+      //           },
+      //         });
+      //         continue;
+      //       }
+      //       if (color === "#409EFF") {
+      //         this.currentEvents.push({
+      //           id: res.data.activities[i].activity_id,
+      //           title: res.data.activities[i].detail,
+      //           startStr:
+      //             res.data.activities[i].date +
+      //             "|" +
+      //             res.data.activities[i].time_start,
+      //           endStr:
+      //             res.data.activities[i].date +
+      //             "|" +
+      //             res.data.activities[i].time_end,
+      //           color: color,
+      //           extendedProps: {
+      //             state: res.data.activities[i].state,
+      //             type: res.data.activities[i].type,
+      //           },
+      //         });
+      //       }
+
+      //       //console.log(res.data.activities[i].date+'T'+res.data.activities[i].time_start);
+      //       INITIAL_EVENTS.push({
+      //         id: res.data.activities[i].activity_id,
+      //         title: res.data.activities[i].detail,
+      //         start:
+      //           res.data.activities[i].date +
+      //           "T" +
+      //           res.data.activities[i].time_start,
+      //         end:
+      //           res.data.activities[i].date +
+      //           "T" +
+      //           res.data.activities[i].time_end,
+      //         color: color,
+      //         extendedProps: {
+      //           state: res.data.activities[i].state,
+      //           type: res.data.activities[i].type,
+      //         },
+      //       });
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
+      // console.log(INITIAL_EVENTS);
+      // this.calendarOptions.events=INITIAL_EVENTS;
     },
 
     handleWeekendsToggle() {
@@ -441,6 +529,7 @@ export default {
         })
         .then((res) => {
           //console.log(thistitle);
+          console.log(res);
           let event1 = this.newCalendar.addEvent({
             id: res.data.activityid,
             title: thistitle,
@@ -537,7 +626,7 @@ export default {
       axios
         .get("http://localhost:8082/doctor/delete", {
           params: {
-            id: "2020001",
+            id: this.myID,
             activity_id: this.nowclickinfo.event.id,
           },
         })
@@ -747,57 +836,34 @@ export default {
       ) {
         return;
       }
-      if (clickInfo.event.extendedProps.type == "1") {
-        //
-        console.log("在这里写修改时间的函数");
-        //在这里写修改时间的函数
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-        //
-      } else {
-        axios
-          .get("http://localhost:8082/doctor/correct", {
-            params: {
-              activity_id: clickInfo.event.id,
-              date1: clickInfo.event.startStr.slice(0, 10),
-              time_start1: clickInfo.event.startStr.slice(11, 19),
-              time_end1: clickInfo.event.endStr.slice(11, 19),
-              detail: clickInfo.event.title,
-              type: clickInfo.event.extendedProps.type,
-              sta: clickInfo.event.extendedProps.state,
-            },
-          })
-          .then((res) => {
-            //console.log(thistitle);
-            //console.log(res);
-            //console.log(event1);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-        this.updateUnfinished(
-          clickInfo.event.id,
-          clickInfo.event.title,
-          clickInfo.event.startStr,
-          clickInfo.event.endStr
-        );
-      }
+
+      axios
+        .get("http://localhost:8082/doctor/correct", {
+          params: {
+            activity_id: clickInfo.event.id,
+            date1: clickInfo.event.startStr.slice(0, 10),
+            time_start1: clickInfo.event.startStr.slice(11, 19),
+            time_end1: clickInfo.event.endStr.slice(11, 19),
+            detail: clickInfo.event.title,
+            type: clickInfo.event.extendedProps.type,
+            sta: clickInfo.event.extendedProps.state,
+          },
+        })
+        .then((res) => {
+          //console.log(thistitle);
+          console.log(res);
+          //console.log(event1);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+      this.updateUnfinished(
+        clickInfo.event.id,
+        clickInfo.event.title,
+        clickInfo.event.startStr,
+        clickInfo.event.endStr
+      );
+
       console.log(clickInfo);
     },
   },
