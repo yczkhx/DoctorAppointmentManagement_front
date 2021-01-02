@@ -376,7 +376,7 @@ export default {
 
     getID(){
       this.myID=this.$route.query.id;
-      // this.authority=this.$route.query.authority;
+      this.authority=this.$route.query.authority;
       //这里拿到了医生的id和权限
     },
 
