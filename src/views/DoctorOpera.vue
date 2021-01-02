@@ -67,7 +67,7 @@
               font-family: FZShuTi;
             "
           >
-            马文博医生，您好
+            主任医生，您好
           </div>
         </el-menu>
       </el-header>

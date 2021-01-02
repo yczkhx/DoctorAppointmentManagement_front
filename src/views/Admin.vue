@@ -330,7 +330,7 @@ export default {
           },
         })
         .then((res) => {
-          //console.log(res);
+          console.log(res);
           this.changePage();
         })
         .catch(function (error) {
@@ -349,7 +349,7 @@ export default {
           },
         })
         .then((res) => {
-          //console.log(res);
+          console.log(res);
           for (var i in res.data) {
             Members.push({
               value: res.data[i].id,

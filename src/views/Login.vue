@@ -190,8 +190,9 @@ export default {
             window.sessionStorage.setItem("token", 'aaa');
             this.$message.success("跳转至个人界面");
             setTimeout(function () {}, 500);
-            this.$router.push({path:"/about",query:{id:this.loginForm.doctorName}});
-            // this.$router.push({path:"/about",query:{id:this.loginForm.doctorName,authority:rea.data.权限}});
+            //this.$router.push({path:"/about",query:{id:this.loginForm.doctorName}});
+            this.$router.push({path:"/about",query:{id:this.loginForm.doctorName,authority:res.data.authority}});
+            console.log(res.data.authority)
           }
         })
         .catch(function (error) {
