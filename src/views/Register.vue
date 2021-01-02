@@ -75,11 +75,7 @@
           >
         </el-form-item>
         <el-form-item>
-          <el-link
-            type="primary"
-            href="#/login"
-            style="float: right;"
-          >
+          <el-link type="primary" href="#/login" style="float: right">
             登录
           </el-link>
         </el-form-item>
@@ -124,7 +120,7 @@ export default {
 
       //登录表单数据绑定
       registerForm: {
-        number:"",
+        number: "",
         username: "",
         password: "",
         confirmPassword: "",
