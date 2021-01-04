@@ -20,7 +20,7 @@
               font-family: STCaiyun;
             "
           >
-            马文博医院
+            黄渡理工职业技术学校附属医院
           </div>
           <!--新建团队-->
           <el-button type="primary" @click="teamDialogFormVisible = true" style="margin-right: 10px;">新建团队</el-button>
@@ -66,7 +66,7 @@
               font-family: FZShuTi;
             "
           >
-            马文博医生，您好
+            医生，您好
           </div>
         </el-menu>
       </el-header>
@@ -87,9 +87,9 @@
             <div class="text item">
               <el-table :data="teamSelected" stripe>
                 <el-table-column label="#" type="index"></el-table-column>
-                <el-table-column property="t_id" label="团队ID" width="255" v-model="teamSelected.t_id"></el-table-column>
-                <el-table-column property="theme" label="团队主题" width="255" v-model="teamSelected.theme"></el-table-column>
-                <el-table-column label="操作" width="200">
+                <el-table-column property="t_id" label="团队ID" width="230" v-model="teamSelected.t_id"></el-table-column>
+                <el-table-column property="theme" label="团队主题" width="230" v-model="teamSelected.theme"></el-table-column>
+                <el-table-column label="操作" width="250">
                   <template v-slot="scope">
                     <el-tooltip effect="dark" content="修改团队主题" placement="top" :enterable="false">
                       <el-button
@@ -105,6 +105,14 @@
                           icon="el-icon-circle-plus-outline"
                           size="mini"
                           @click="increaseMember(scope.row.t_id)"
+                      ></el-button>
+                    </el-tooltip>
+                    <el-tooltip effect="dark" content="新建团队事务" placement="top" :enterable="false">
+                      <el-button
+                          type="success"
+                          icon="el-icon-plus"
+                          size="mini"
+                          @click="increaseActivity(scope.row.t_id)"
                       ></el-button>
                     </el-tooltip>
                     <el-tooltip effect="dark" content="删除团队成员" placement="top" :enterable="false">
@@ -156,6 +164,43 @@
                     </template>
                   </el-table-column>
                 </el-table>
+              </el-dialog>
+
+              <!--新建团事务对话框-->
+              <el-dialog title="增加团队事务" :visible.sync="increaseActivityVisible" style="overflow: auto">
+                <el-form :model="ruleForm" label-width="100px">
+                  <el-form-item label="团队id">
+                    <el-input v-model="ruleForm.t_id" :disabled="true"></el-input>
+                  </el-form-item>
+                  <el-form-item label="事务日期" required>
+                    <el-col :span="22">
+                      <el-form-item>
+                        <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.date1" style="width: 100%;"></el-date-picker>
+                      </el-form-item>
+                    </el-col>
+                  </el-form-item>
+                  <el-form-item label="事务阶段" required>
+                    <el-col :span="22">
+                      <el-form-item>
+                        <el-time-picker placeholder="选择开始时间" v-model="ruleForm.time_start1" style="width: 100%;"></el-time-picker>
+                      </el-form-item>
+                    </el-col>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-col :span="22">
+                      <el-form-item>
+                        <el-time-picker placeholder="选择结束时间" v-model="ruleForm.time_end1" style="width: 100%;"></el-time-picker>
+                      </el-form-item>
+                    </el-col>
+                  </el-form-item>
+                  <el-form-item label="事务细节">
+                    <el-input type="textarea" v-model="ruleForm.detail"></el-input>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="upIncreaseActivity()">立即创建</el-button>
+                    <el-button @click="closeForm()">取消</el-button>
+                  </el-form-item>
+                </el-form>
               </el-dialog>
 
               <!--删除成员对话框-->
@@ -279,6 +324,13 @@ export default {
           name: '于会艳'
         }
       ],
+      ruleForm: {
+        t_id: 1,
+        date1: '',
+        time_start1: '',
+        time_end1: '',
+        detail: ''
+      },
       activityFormRules: {
         detail:{
           required: true, message: '请输入活动内容', trigger: 'blur'
@@ -301,9 +353,10 @@ export default {
       changeTeamThemeDialogFormVisible: false,
       increaseMemberVisible: false,
       deleteMemberVisible: false,
+      increaseActivityVisible: false,
       activityForm: {
-        id: '',
-        date: '',
+        id: 1,
+        date1: '',
         time_start1: '',
         time_end1: '',
         detail: ''
@@ -360,6 +413,33 @@ export default {
   },
 
   methods: {
+    dateChange(date)  {
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        var minute = date.getMinutes();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        var second= date.getSeconds();
+        second = second < 10 ? ('0' + second) : second;
+        return y + '-' + m + '-' + d;
+    },
+    dateChanges(date) {
+        var y = date.getFullYear();
+        var m = date.getMonth() + 1;
+        m = m < 10 ? ('0' + m) : m;
+        var d = date.getDate();
+        d = d < 10 ? ('0' + d) : d;
+        var h = date.getHours();
+        h = h < 10 ? ('0' + h) : h;
+        var minute = date.getMinutes();
+        minute = minute < 10 ? ('0' + minute) : minute;
+        var second= date.getSeconds();
+        second = second < 10 ? ('0' + second) : second;
+        return h+':'+minute+':'+ second;
+    },
     // memberUpdate(){
     //   axios
     //       .post("http://localhost:8082/doctor/build", {
@@ -403,7 +483,6 @@ export default {
             // for (let i = 0; i < res.data.length; i++) {
             //   this.dataSelected = res.data[i]
             // }
-            console.log(res.data.length)
             // for (let i = 0; i < res.data.length; i++) {
             //   this.requestData.push({
             //     t_id: res.data[i].t_id,
@@ -439,7 +518,7 @@ export default {
       console.log(this.teamID)
       console.log(this.teamTheme)
     },
-    //修改团队主题
+    //修改团队主题✅
     upChangeTeamTheme() {
       axios
       .get("http://localhost:8082/doctor/correct_team", {
@@ -523,6 +602,54 @@ export default {
           return this.$message.error("加入失败")
         })
       }
+    },
+
+    //增加团队事务
+
+    increaseActivity(t_id) {
+      this.increaseActivityVisible = true
+      this.ruleForm.t_id = t_id
+      this.teamID = t_id
+      console.log("tid" + this.ruleForm.t_id)
+      console.log("teamID" + this.teamID)
+    },
+
+    upIncreaseActivity() {
+      let date1 = this.dateChange(this.ruleForm.date1).toString()
+      console.log(date1)
+      // let t_id = parseInt(this.ruleForm.t_id)
+      let time_start = this.dateChanges(this.ruleForm.time_start1).toString()
+      console.log("start: " + time_start)
+      let time_end = this.dateChanges(this.ruleForm.time_end1).toString()
+      console.log("end: " + time_end)
+      console.log(this.ruleForm.detail)
+      axios
+      .get("http://localhost:8082/doctor/new_t_activity", {
+        params: {
+          t_id: this.ruleForm.t_id,
+          date1: date1,
+          time_start1: time_start,
+          time_end1: time_end,
+          detail: this.ruleForm.detail
+        },
+      })
+      .then((res) => {
+        console.log(res)
+        console.log("su当前t_id:" + this.ruleForm.t_id)
+        console.log("su当前teamID:" + this.teamID)
+        this.$message.success("新建团事务成功")
+        this.increaseActivityVisible = false
+      })
+      .catch((res) => {
+        console.log(res)
+        console.log("err当前t_id:" + this.ruleForm.t_id)
+        console.log("err当前teamID:" + this.teamID)
+        this.$message.success("新建团队事务失败")
+      })
+    },
+
+    closeForm() {
+      this.increaseActivityVisible = false
     },
 
     //接收团队成员✅

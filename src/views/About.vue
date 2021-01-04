@@ -43,7 +43,7 @@
               font-family: FZShuTi;
             "
           >
-            {{ myID }}，您好
+            医生，您好
           </div>
         </el-menu>
       </el-header>
