@@ -12,12 +12,6 @@
         <h3 class="login_title">登录</h3>
 
         <div class="login_header_title">
-          <span :class="{ on: loginType == 0 }" @click="loginType = 0"
-            >患者</span
-          >
-          <span :class="{ on: loginType == 1 }" @click="loginType = 1"
-            >医生</span
-          >
         </div>
         <div v-if="loginType == 0">
           <el-form-item prop="username">
@@ -46,7 +40,7 @@
             <el-button
               type="primary"
               style="width: 100%; background: #505458; border: none"
-              v-on:click="login"
+              v-on:click="loginTel1"
               >登录</el-button
             >
           </el-form-item>
@@ -84,18 +78,6 @@
             >
           </el-form-item>
         </div>
-
-        <el-form-item style="width: 30%; margin-left: 200px">
-          <el-button
-            style="
-              width: 100%;
-              border: none;
-              background-color: rgba(255, 255, 255, 0.65);
-            "
-            v-on:click="goToRegister"
-            >立即注册</el-button
-          >
-        </el-form-item>
       </el-form>
     </el-container>
   </div>
@@ -113,7 +95,7 @@ export default {
 
   data() {
     return {
-      loginType: 0,
+      loginType: 1,
       loading: true,
       //登录表单数据绑定
       loginForm: {
@@ -141,9 +123,9 @@ export default {
       console.log("login");
 
       axios
-        .get("http://localhost:8081/patient/login", {
+        .get("https://www.rhysdid.site:8299/patient/login", {
           params: {
-            name: this.loginForm.username,
+            id: this.loginForm.username,
             passwd1: this.loginForm.password,
           },
         })
@@ -172,14 +154,10 @@ export default {
     },
     loginTel1() {
       console.log("login");
-
       axios
-        .get("http://localhost:8082/doctor/login", {
-          params: {
-            id: this.loginForm.doctorName,
-            passwd1: this.loginForm.docPassword,
-          },
-        })
+        .post(
+          `https://www.rhysdid.site:8082/doctor/login?id=${this.loginForm.doctorName}&passwd1=${this.loginForm.docPassword}`
+        )
         .then((res) => {
           console.log(res);
           if (res.data.state == "idwrong") {
@@ -187,22 +165,18 @@ export default {
           } else if (res.data.state == "passwrong") {
             this.$message.error("密码错误");
           } else if (res.data.state == "success") {
-            window.sessionStorage.setItem("token", 'aaa');
-            this.$message.success("跳转至个人界面");
+            window.sessionStorage.setItem("token", "aaa");
             setTimeout(function () {}, 500);
             //this.$router.push({path:"/about",query:{id:this.loginForm.doctorName}});
-            this.$router.push({path:"/about",query:{id:this.loginForm.doctorName,authority:res.data.authority}});
-            console.log(res.data.authority)
+            this.$router.push({
+              path: "/admin",
+            });
+            console.log(res.data.authority);
           }
         })
         .catch(function (error) {
           console.log(error);
         });
-    },
-    async goToRegister() {
-      this.$message.success("跳转至注册界面");
-      setTimeout(function () {}, 500);
-      this.$router.push("/register");
     },
   },
 };

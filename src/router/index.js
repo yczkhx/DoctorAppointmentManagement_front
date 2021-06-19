@@ -6,8 +6,11 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'Home',
-    component: () => import(/* webpackChunkName: "about" */'../views/Home.vue')
+    // name: 'Home',
+    // component: () => import(/* webpackChunkName: "about" */'../views/Home.vue')
+    name: 'Admin',
+
+    component: () => import('../views/Admin.vue')
   },
   {
     path: '/about',
@@ -30,12 +33,18 @@ const routes = [
     component: () => import('../views/Admin.vue')
   },
   {
+    path: '/admin/distribute',
+    name: 'Distribute',
+
+    component: () => import('../views/Distribute.vue')
+  },
+  {
     path: '/organ/',
     name: 'organ',
     component: () => import('../views/Organ.vue')
   },
   {
-    path: '/login',
+    path: '/adminLogin',
     name: 'Login',
 
     component: () => import('../views/Login.vue')
@@ -54,17 +63,17 @@ const router = new VueRouter({
 
 //挂载路由导航守卫
 router.beforeEach((to, from, next) => {
-  if (to.path === '/login' || to.path === '/register') {
+  if (to.path === '/adminLogin' || to.path === '/register') {
     window.sessionStorage.clear();
     return next();
   }
   if (to.path === '/') {
-    return next();
+    return next('/admin');
   }
   //获取token
   const tokenStr = window.sessionStorage.getItem('token');
   //无token强制跳转到登录页面
-  if (!tokenStr) return next('/login');
+  if (!tokenStr) return next('/adminLogin');
   next();
 })
 
